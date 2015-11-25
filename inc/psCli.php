@@ -13,7 +13,8 @@ class psCli extends StdClass {
         "debug",
         "verbose",
         "progress",
-        "output-format="
+        "output-format=",
+        "base64"
     );
     const E_URL = 2;
     const E_KEY = 3;
@@ -52,7 +53,7 @@ class psCli extends StdClass {
         $opts = $o->getopt($argv, $shortopts, $longopts);
         if (PEAR::isError($opts)) {
             self::help();
-            self::error('Error: ' . $opts->getMessage());
+            psOut::error('Error: ' . $opts->getMessage());
         }
         $goptions = $opts[0];
         $options["args"] = $opts[1];
@@ -87,6 +88,7 @@ class psCli extends StdClass {
         self::$debug = self::isarg("debug|d", $options);
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
+        psOut::$base64 = self::isarg("base64", $options);
         psOut::$oformat = self::getarg("output-format", $options, "cli");
         if (self::$debug) {
             //self::msg("Available options:\n" . print_r($longopts, true));

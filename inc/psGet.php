@@ -23,14 +23,19 @@ class psGet extends psCli {
         return($options);
     }
 
-    public function getValues($obj) {
+    public function getValues($obj, $properties = false) {
         $row = Array();
-        if (!self::$properties) {
-            $properties = self::listProperties($obj);
-        } else {
-            $properties = self::$properties;
+        if (!$properties) {
+            if (!self::$properties) {
+                $properties = self::listProperties($obj);
+            } else {
+                $properties = self::$properties;
+            }
         }
         foreach ($properties as $p => $v) {
+            if (!isset($obj->$p)) {
+                psOut::error("Property $p unknown!'");
+            }
             if (!is_object($obj->$p)) {
                 $row[$p] = $obj->$p;
             } elseif (isset($obj->$p->language)) {

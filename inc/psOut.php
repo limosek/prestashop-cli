@@ -4,6 +4,7 @@ class psOut extends StdClass {
     static $progress = false;
     static $log = false;
     static $oformat = "cli";
+    static $base64 = false;
     
     public function write($data) {
         switch (self::$oformat) {
@@ -28,14 +29,29 @@ class psOut extends StdClass {
         fputs(self::$log, $txt);
     }
     
+    public function progress($num=false,$cnt=false) {
+        if (self::$progress) {
+            psOut::msg(sprintf("Progress: %d of %d objects...    \r",$num,$cnt));
+            flush();
+        }
+    }
+    
     public function nl2slashes($str) {
         return(preg_replace("/\r/m", '\r',preg_replace("/\n/m", '\n',$str)));
+    }
+    
+    public function ifbase64($var) {
+        if (!self::$base64) {
+            return($var);
+        } else {
+            return(base64_encode($var));
+        }
     }
     
     public function expvar($var) {
         if (is_object($var)) {
             if (isset($var->language) && array_key_exists(psCli::$lang,$var->language)) {
-                return($var->language[psCli::$lang]);
+                return(self::ifbase64($var->language[psCli::$lang]));
             } elseif (isset($var->language) && !array_key_exists(psCli::$lang,$var->language)) {
                 return(null);
             } else {
@@ -43,9 +59,9 @@ class psOut extends StdClass {
                 return(null);
             }
         } elseif (is_array($var)) {
-            return(print_r($var,true));
+            return(self::ifbase64(print_r($var,true)));
         } else {
-            return($var);
+            return(self::ifbase64($var));
         }
     }
 

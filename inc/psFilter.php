@@ -40,19 +40,23 @@ class psFilter extends StdClass {
     }
 
     public function isFiltered($filter, $obj) {
-        if (count($filter) == 0)
+        if (!is_array($filter) || count($filter) == 0)
             return(false);
 
         reset($filter);
         $fout = false;
         foreach ($filter as $type => $f) {
             foreach ($f as $attr => $val) {
-                if (isset($val->language)) {
-                    $data=$obj->$val->language[psCli::$lang];
-                    $isset=array_key_exists(psCli::$lang,$obj->$val->language);
+                if (isset($obj->$attr->language)) {
+                    $data=$obj->$attr->language[psCli::$lang];
+                    $isset=array_key_exists(psCli::$lang,$obj->$attr->language);
                 } else {
-                    $data=$obj->$val;
-                    $isset=isset($obj->$val);
+                    if (isset($obj->$attr)) {
+                        $data=$obj->$attr;
+                        $isset=isset($obj->$attr);
+                    } else {
+                        psOut::error("Filter property $attr unknown! See --list-properties.");
+                    }
                 }
                 if ($isset && !is_object($data)) {
                     switch ($type) {
