@@ -2,12 +2,12 @@
 
 class psGet extends psCli {
 
-    const LONGOPTS = Array("property=", "list-properties");
+    static $longopts = Array("property=", "list-properties");
 
     static $properties = false;
 
     public function init($argv, $longopts = false, $shortopts = false) {
-        $options = parent::init($argv, self::LONGOPTS);
+        $options = parent::init($argv, self::$longopts);
         self::$properties = Array();
         if (is_array(self::getarg("property", $options))) {
             foreach (self::getarg("property", $options) as $p) {

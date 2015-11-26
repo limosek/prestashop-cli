@@ -4,6 +4,12 @@ This software is used to communicate with Prestashop via its API and to get/modi
 
 # Howto
 
+## Installation ##
+prestasoph-cli needs php5 cli and PHP pear package. On debian systems, use:
+```
+sudo apt-get install php5-cli php-pear php5-curl
+```
+
 ## Configuration ##
 First, enable API access in your Prestashop and create API token. Next, create file ~/.psclirc with configuration:
 

@@ -35,7 +35,7 @@ try {
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors
     $trace = $e->getTrace();
-    PsCli::error('Other error<br />' . $e->getMessage());
+    PsOut::error('Other error<br />' . $e->getMessage());
 }
 
 

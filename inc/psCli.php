@@ -2,8 +2,8 @@
 
 class psCli extends StdClass {
 
-    const SHORTOPTS = "hvu:k:";
-    const LONGOPTS = Array(
+    static $shortopts = "hvu:k:";
+    static $longopts = Array(
         "help",
         "config-file=",
         "shop-url=",
@@ -40,14 +40,14 @@ class psCli extends StdClass {
     public function init($argv, $longopts = false, $shortopts = false) {
         psOut::$log = fopen('php://stderr', 'w+');
         if (is_array($shortopts)) {
-            $shortopts = array_merge(self::SHORTOPTS, $shortopts);
+            $shortopts = array_merge(self::$shortopts, $shortopts);
         } else {
-            $shortopts = self::SHORTOPTS;
+            $shortopts = self::$shortopts;
         }
         if (is_array($longopts)) {
-            $longopts = array_merge(self::LONGOPTS, $longopts);
+            $longopts = array_merge(self::$longopts, $longopts);
         } else {
-            $longopts = self::LONGOPTS;
+            $longopts = self::$longopts;
         }
         $o = New Console_Getopt;
         $opts = $o->getopt($argv, $shortopts, $longopts);
@@ -78,7 +78,7 @@ class psCli extends StdClass {
         self::$shop_url = self::getarg("shop-url|u", $options);
         self::$shop_key = self::getarg("shop-key|k", $options);
         if (!self::$shop_url) {
-            self::error("Shop url not set!", self::E_MISSOPT);
+            psOut::error("Shop url not set!", self::E_MISSOPT);
         }
         if (!self::$shop_key) {
             self::error("Shop key not set!", self::E_MISSOPT);
