@@ -14,7 +14,8 @@ class psCli extends StdClass {
         "verbose",
         "progress",
         "output-format=",
-        "base64"
+        "base64",
+        "buffered"
     );
     const E_URL = 2;
     const E_KEY = 3;
@@ -85,6 +86,10 @@ class psCli extends StdClass {
         }
         self::$lang = self::getarg("language|L", $options,1);
         self::$long = self::isarg("long|l", $options);
+        psOut::$buffered = self::isarg("buffered", $options);
+        if (psOut::$buffered) {
+            ob_start();
+        }
         self::$debug = self::isarg("debug|d", $options);
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
@@ -165,6 +170,28 @@ class psCli extends StdClass {
             }
         }
         return($ret);
+    }
+    
+    public function subobject($objects) {
+        switch ($objects) {
+            case "addresses":
+                return("address");
+                break;
+            default:
+                return(substr($objects,0,-1));
+                break;
+        }
+    }
+    
+    public function upobject($object) {
+        switch ($object) {
+            case "address":
+                return("addresses");
+                break;
+            default:
+                return($object."s");
+                break;
+        }
     }
 
     public function help() {

@@ -32,9 +32,13 @@ class psGet extends psCli {
                 $properties = self::$properties;
             }
         }
+        if (array_key_exists("*", $properties)) {
+            $properties = self::listProperties($obj);
+        }
         foreach ($properties as $p => $v) {
             if (!isset($obj->$p)) {
-                psOut::error("Property $p unknown!'");
+                psOut::msg("List of availbalbe properties: ".join(",",array_flip(self::listProperties($obj)))."\n");
+                psOut::error("Property $p unknown!");
             }
             if (!is_object($obj->$p)) {
                 $row[$p] = $obj->$p;

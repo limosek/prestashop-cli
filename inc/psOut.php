@@ -5,6 +5,9 @@ class psOut extends StdClass {
     static $log = false;
     static $oformat = "cli";
     static $base64 = false;
+    static $buffered = false;
+    static $context = false;
+    static $category = "row";
     
     public function write($data) {
         switch (self::$oformat) {
@@ -14,12 +17,32 @@ class psOut extends StdClass {
                 break;
             case "env": self::env($data);
                 break;
+            case "xml": self::xml($data);
+                break;
             case "php": self::php($data);
                 break;
             default: self::error("Unknown output format " . self::$oformat);
         }
     }
     
+    public function begin($context=false,$category=false) {
+        self::$context=$context;
+        self::$category=$category;
+        switch (self::$oformat) {
+            case "xml": 
+                if (self::$context) { echo "<".self::$context.">\n"; }
+                break;
+        }
+    }
+
+    public function end($data) {
+        switch (self::$oformat) {
+            case "xml": 
+                if (self::$context) { echo "</".self::$context.">\n"; }
+                break;
+        }
+    }
+
     public function error($txt, $code = 1) {
         fputs(self::$log, $txt . "\n");
         exit($code);
@@ -29,9 +52,17 @@ class psOut extends StdClass {
         fputs(self::$log, $txt);
     }
     
-    public function progress($num=false,$cnt=false) {
+    public function flush() {
+        ob_end_flush();
+    }
+    
+    public function progress($msg=false,$num=false,$cnt=false) {
         if (self::$progress) {
-            psOut::msg(sprintf("Progress: %d of %d objects...    \r",$num,$cnt));
+            if ($msg) {
+                psOut::msg("$msg    \r");
+            } else {
+                psOut::msg(sprintf("Progress: %d of %d objects...    \r",$num,$cnt));
+            }
             flush();
         }
     }
@@ -110,6 +141,17 @@ class psOut extends StdClass {
     
     public function php($data) {
         print_r($data);
+    }
+    
+    public function xml($data) {
+        $row=self::$category;
+        foreach ($data as $line) {
+            echo " <$row>\n";
+            foreach ($line as $column => $value) {
+                echo sprintf("  <%s>%s</%s>\n",$column,$value,$column);
+            }
+            echo " </$row>\n";
+        }
     }
 
 }
