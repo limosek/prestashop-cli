@@ -14,12 +14,92 @@ class psCli extends StdClass {
         "verbose",
         "progress",
         "output-format=",
+        "properties=",
         "base64",
         "buffered"
     );
+    static $resources = Array(
+        'addresses' => 'The Customer, Manufacturer and Customer addresses',
+        'carriers' => 'The Carriers',
+        'cart_rules' => 'Cart rules management',
+        'carts' => 'Customers carts',
+        'categories' => 'The product categories',
+        'combinations' => 'The product combination',
+        'configurations' => 'Shop configuration',
+        'contacts' => 'Shop contacts',
+        'content_management_system' => 'Content management system',
+        'countries' => 'The countries',
+        'currencies' => 'The currencies',
+        'customer_messages' => 'Customer services messages',
+        'customer_threads' => 'Customer services threads',
+        'customers' => 'The e-shops customers',
+        'deliveries' => 'Product delivery',
+        'employees' => 'The Employees',
+        'groups' => 'The customers groups',
+        'guests' => 'The guests',
+        'image_types' => 'The image types',
+        'images' => 'The images',
+        'images/general/header' => 'The shops logo in the header',
+        'images/general/mail' => 'The shops logo in the e-mails',
+        'images/general/invoice' => 'The shops logo in the invoice',
+        'images/general/store_icon' => 'The shops logo as a favicon',
+        'images/products' => 'The products images.',
+        'images/categories' => 'The categories images',
+        'images/manufacturers' => 'The manufacturers images.',
+        'images/suppliers' => 'The suppliers images.',
+        'images/stores' => 'The stores images.',
+        'languages' => 'Shop languages',
+        'manufacturers' => 'The product manufacturers',
+        'order_carriers' => 'Details of an order',
+        'order_details' => 'Details of an order',
+        'order_discounts' => 'Discounts of an order',
+        'order_histories' => 'The Order histories',
+        'order_invoices' => 'The Order invoices',
+        'order_payments' => 'The Order payments',
+        'order_states' => 'The Order states',
+        'orders' => 'The Customers orders',
+        'price_ranges' => 'Price range',
+        'product_feature_values' => 'The product feature values',
+        'product_features' => 'The product features',
+        'product_option_values' => 'The product options value',
+        'product_options' => 'The product options',
+        'product_suppliers' => 'Product Suppliers',
+        'products' => 'The products',
+        'search' => 'Search',
+        'shop_groups' => 'Shop groups from multi-shop feature',
+        'shops' => 'Shops from multi-shop feature',
+        'specific_price_rules' => 'Specific price management',
+        'specific_prices' => 'Specific price management',
+        'states' => 'The available states of countries',
+        'stock_availables' => 'Available quantities',
+        'stock_movement_reasons' => 'The stock movement reason',
+        'stock_movements' => 'Stock movements management',
+        'stocks' => 'Stocks',
+        'stores' => 'The stores',
+        'suppliers' => 'The product suppliers',
+        'supply_order_details' => 'Supply Order Details',
+        'supply_order_histories' => 'Supply Order Histories',
+        'supply_order_receipt_histories' => 'Supply Order Receipt Histories',
+        'supply_order_states' => 'Supply Order States',
+        'supply_orders' => 'Supply Orders',
+        'tags' => 'The Products tags',
+        'tax_rule_groups' => 'Tax rule groups',
+        'tax_rules' => 'Tax rules entity',
+        'taxes' => 'The tax rate',
+        'translated_configurations' => 'Shop configuration',
+        'warehouse_product_locations' => 'Location of products in warehouses',
+        'warehouses' => 'Warehouses',
+        'weight_ranges' => 'Weight ranges',
+        'zones' => 'The Countries zones',
+    );
+
     const E_URL = 2;
     const E_KEY = 3;
     const E_MISSOPT = 4;
+    
+    const P_DEFAULT = -1;
+    const P_CFG = -2;
+    const P_FILTER = -3;
 
     static $cfgfile;
     static $shop_url;
@@ -29,24 +109,26 @@ class psCli extends StdClass {
     static $debug = false;
     static $verbose = false;
     static $options = false;
+    static $goptions = false;
+    static $foptions = false;
+    static $properties;
     static $args = false;
 
     /**
      * 
      * @param array $argv Arguments to parse
-     * @param array $longopts Long options for extension else false
-     * @param array $shortopts Short options for extension else false
+     * @param array $contexts Contexts to read from cfg file
      * @return array Array of parsed options
      */
-    public function init($argv, $longopts = false, $shortopts = false) {
+    public function init($argv, $contexts=false) {
         psOut::$log = fopen('php://stderr', 'w+');
-        if (is_array($shortopts)) {
-            $shortopts = array_merge(self::$shortopts, $shortopts);
+        if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
+            $shortopts = array_merge(self::$shortopts, parent::$shortopts);
         } else {
             $shortopts = self::$shortopts;
         }
-        if (is_array($longopts)) {
-            $longopts = array_merge(self::$longopts, $longopts);
+        if (isset(parent::$longopts) && is_array(parent::$longopts)) {
+            $longopts = array_merge(self::$longopts, parent::$longopts);
         } else {
             $longopts = self::$longopts;
         }
@@ -56,58 +138,11 @@ class psCli extends StdClass {
             self::help();
             psOut::error('Error: ' . $opts->getMessage());
         }
-        $goptions = $opts[0];
-        $options["args"] = $opts[1];
         self::$args = $opts[1];
-        $goptions = self::condense_arguments($opts);
-        self::$cfgfile = self::getarg("config-file", $goptions, getenv("HOME") . "/.psclirc");
-        if (file_exists(self::$cfgfile)) {
-            $foptions = self::readcfg(self::$cfgfile);
-        } else {
-            $foptions = Array();
-        }
-        foreach ($foptions as $opt => $val) {
-            if ($val)
-                $options[$opt] = $val;
-        }
-        foreach ($goptions as $opt => $val) {
-            if (array_key_exists($opt, $goptions)) {
-                $options[$opt] = $goptions[$opt];
-            }
-        }
-
-        self::$shop_url = self::getarg("shop-url|u", $options);
-        self::$shop_key = self::getarg("shop-key|k", $options);
-        if (!self::$shop_url) {
-            psOut::error("Shop url not set!", self::E_MISSOPT);
-        }
-        if (!self::$shop_key) {
-            self::error("Shop key not set!", self::E_MISSOPT);
-        }
-        self::$lang = self::getarg("language|L", $options,1);
-        self::$long = self::isarg("long|l", $options);
-        psOut::$buffered = self::isarg("buffered", $options);
-        if (psOut::$buffered) {
-            ob_start();
-        }
-        self::$debug = self::isarg("debug|d", $options);
-        self::$verbose = self::isarg("verbose|v", $options);
-        psOut::$progress = self::isarg("progress|p", $options);
-        psOut::$base64 = self::isarg("base64", $options);
-        psOut::$oformat = self::getarg("output-format", $options, "cli");
-        if (self::$debug) {
-            //self::msg("Available options:\n" . print_r($longopts, true));
-            //self::msg("Getopt options:\n" . print_r($opts, true));
-            psOut::msg("Config and CLI options:\n" . print_r($options, true));
-        }
-        self::$options = $options;
-        if (self::isarg("help|h", $options)) {
-            self::help();
-            exit;
-        }
-        return($options);
+        self::$goptions = self::condense_arguments($opts);
+        self::$cfgfile = self::getarg("config-file", self::$goptions, getenv("HOME") . "/.psclirc");
     }
-
+    
     private function condense_arguments($params) {
         $new_params = array();
         foreach ($params[0] as $param) {
@@ -156,8 +191,75 @@ class psCli extends StdClass {
         return(false);
     }
 
-    public function readcfg($file) {
-        return(parse_ini_file($file, false));
+    public function readcfg($contexts) {
+        if (file_exists(self::$cfgfile)) {
+            $allfoptions = parse_ini_file(self::$cfgfile, true);
+            $foptions=Array();
+            if (!$contexts) $contexts=Array("global");
+            foreach ($contexts as $context) {
+                if (array_key_exists($context,$allfoptions)) {
+                    $foptions = array_merge($foptions,$allfoptions[$context]);
+                }
+            }
+        } else {
+            $foptions = Array();
+        }
+        $options=Array();
+        foreach ($foptions as $opt => $val) {
+            if ($val)
+                $options[$opt] = $val;
+        }
+        foreach (self::$goptions as $opt => $val) {
+            if (array_key_exists($opt, self::$goptions)) {
+                $options[$opt] = self::$goptions[$opt];
+            }
+        }
+
+        self::$shop_url = self::getarg("shop-url|u", $options);
+        self::$shop_key = self::getarg("shop-key|k", $options);
+        if (!self::$shop_url) {
+            psOut::error("Shop url not set!", self::E_MISSOPT);
+        }
+        if (!self::$shop_key) {
+            self::error("Shop key not set!", self::E_MISSOPT);
+        }
+        self::$lang = self::getarg("language|L", $options,1);
+        self::$long = self::isarg("long|l", $options);
+        psOut::$buffered = self::isarg("buffered", $options);
+        if (psOut::$buffered) {
+            ob_start();
+        }
+        self::$debug = self::isarg("debug|d", $options);
+        self::$verbose = self::isarg("verbose|v", $options);
+        psOut::$progress = self::isarg("progress|p", $options);
+        psOut::$base64 = self::isarg("base64", $options);
+        psOut::$oformat = self::getarg("output-format", $options, "cli");
+        self::$properties = self::reverseProps(self::getarg("properties", $options,Array(1=>"id")));
+        if (!is_array(self::$properties)) {
+            self::$properties=Array(self::$properties => self::P_CFG);
+        }
+        if (self::$debug) {
+            psOut::msg("Config and CLI options:\n" . print_r($options, true));
+            psOut::msg("Properties to get:\n" . print_r(self::$properties, true));
+        }
+        self::$options = $options;
+        if (self::isarg("help|h", $options)) {
+            self::help();
+            exit;
+        }
+        return($options);
+    }
+    
+    public function reverseProps($properties) {
+        $out=Array();
+        if (is_array($properties)) {
+            foreach ($properties as $p) {
+                $out[$p]=self::P_CFG;
+            }
+        } else {
+            return(Array($properties => self::P_CFG));
+        }
+        return($out);
     }
 
     public function args($args) {
@@ -193,7 +295,7 @@ class psCli extends StdClass {
                 break;
         }
     }
-
+    
     public function help() {
         psOut::msg("Common options:\n");
         psOut::msg("--help        This help\n");

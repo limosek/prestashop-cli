@@ -3,6 +3,7 @@
 class psFilter extends StdClass {
     
     static $enabled=false;
+    static $filter=false;
 
     public function create($fstr) {
         $filter = Array();
@@ -17,35 +18,34 @@ class psFilter extends StdClass {
             if (preg_match("/(.*)=(.*)/", $f)) {
                 preg_match("/(.*)=(.*)/", $f, $farr);
                 $filter["eq"][$farr[1]] = $farr[2];
-            }
-            if (preg_match("/(.*)>(.*)/", $f)) {
+            } elseif (preg_match("/(.*)>(.*)/", $f)) {
                 preg_match("/(.*)>(.*)/", $f, $farr);
                 $filter["gt"][$farr[1]] = $farr[2];
-            }
-            if (preg_match("/(.*)<(.*)/", $f)) {
+            } elseif (preg_match("/(.*)<(.*)/", $f)) {
                 preg_match("/(.*)<(.*)/", $f, $farr);
                 $filter["lt"][$farr[1]] = $farr[2];
-            }
-            if (preg_match("/(.*)~(.*)/", $f)) {
+            } elseif (preg_match("/(.*)~(.*)/", $f)) {
                 preg_match("/(.*)~(.*)/", $f, $farr);
                 $filter["re"][$farr[1]] = $farr[2];
-            }
-            if (preg_match("/(.*)!(.*)/", $f)) {
+            } elseif (preg_match("/(.*)!(.*)/", $f)) {
                 preg_match("/(.*)!(.*)/", $f, $farr);
                 $filter["nre"][$farr[1]] = $farr[2];
+            } else {
+                $filter["re"][$f] = "(.*)";
             }
         }
         self::$enabled=true;
+        self::$filter=$filter;
         return($filter);
     }
 
-    public function isFiltered($filter, $obj) {
-        if (!is_array($filter) || count($filter) == 0)
+    public function isFiltered($obj) {
+        if (!is_array(self::$filter) || count(self::$filter) == 0)
             return(false);
 
-        reset($filter);
+        reset(self::$filter);
         $fout = false;
-        foreach ($filter as $type => $f) {
+        foreach (self::$filter as $type => $f) {
             foreach ($f as $attr => $val) {
                 if (isset($obj->$attr->language)) {
                     $data=$obj->$attr->language[psCli::$lang];
@@ -55,7 +55,7 @@ class psFilter extends StdClass {
                         $data=$obj->$attr;
                         $isset=isset($obj->$attr);
                     } else {
-                        psOut::error("Filter property $attr unknown! See --list-properties.");
+                        psOut::error("Filter property $attr unknown! Available properties: ".join(",",array_flip(psGet::listProperties($obj))));
                     }
                 }
                 if ($isset && !is_object($data)) {
@@ -79,13 +79,13 @@ class psFilter extends StdClass {
                             }
                             break;
                         case "re":
-                            if (!preg_match("$val", $data)) {
+                            if (!preg_match("/$val/", $data)) {
                                 $fout = true;
                                 $fwhy = "$attr~$val";
                             }
                             break;
                         case "nre":
-                            if (preg_match("$val", $data)) {
+                            if (preg_match("/$val/", $data)) {
                                 $fout = true;
                                 $fwhy = "$attr~$val";
                             }
@@ -95,7 +95,7 @@ class psFilter extends StdClass {
             }
         }
         if (psCli::$debug && $fout) {
-            psCli::msg("Filtering object due to $fwhy\n");
+            psOut::msg("Filtering object due to $fwhy\n");
         }
         return($fout);
     }
