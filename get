@@ -7,8 +7,10 @@ try {
     $args=PsGet::args($argv);
     if (count($args)<2) {
         PsOut::error("Error! Enter object[s] you want to get.\n".basename(__FILE__)
-                . " {".join("|",array_keys(psCli::$resources))."} id [property]...\n"
-                . "Property '*' or empty properties means everything."
+                . " resource id [property]...\n"
+                . "Property '*' or empty properties means everything.\n"
+                . "Available resources:\n"
+                . psCli::helpResource()
                 . "\n");
     }
     
@@ -20,17 +22,15 @@ try {
     if (sizeof($properties)==0) {
         $properties=Array("*" => 1);
     }
-    $webService = new PrestaShopWebservice(psList::$shop_url, psList::$shop_key, false);
+    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
     $opt = array('resource' => $objects);
     psOut::progress("Getting data for $objects($object)...");
     psOut::begin($object);
     $opt['id'] = $objectid;
     $xml = $webService->get($opt);
     $rowobject = json_decode(json_encode($xml->children()->$object));
-    $rowdata=psGet::getValues($rowobject,$properties);
-    psOut::write(Array(
-            0 => $rowdata
-            ));
+    $rowdata=psGet::getValues($xml->children()->$object,$properties);
+    psOut::write($rowdata);
     psOut::end($object);
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors

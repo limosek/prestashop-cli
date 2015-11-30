@@ -2,7 +2,7 @@
 
 class psCli extends StdClass {
 
-    static $shortopts = "hvu:k:";
+    static $shortopts = "hvu:k:F:";
     static $longopts = Array(
         "help",
         "config-file=",
@@ -37,17 +37,6 @@ class psCli extends StdClass {
         'employees' => 'The Employees',
         'groups' => 'The customers groups',
         'guests' => 'The guests',
-        'image_types' => 'The image types',
-        'images' => 'The images',
-        'images/general/header' => 'The shops logo in the header',
-        'images/general/mail' => 'The shops logo in the e-mails',
-        'images/general/invoice' => 'The shops logo in the invoice',
-        'images/general/store_icon' => 'The shops logo as a favicon',
-        'images/products' => 'The products images.',
-        'images/categories' => 'The categories images',
-        'images/manufacturers' => 'The manufacturers images.',
-        'images/suppliers' => 'The suppliers images.',
-        'images/stores' => 'The stores images.',
         'languages' => 'Shop languages',
         'manufacturers' => 'The product manufacturers',
         'order_carriers' => 'Details of an order',
@@ -65,7 +54,6 @@ class psCli extends StdClass {
         'product_options' => 'The product options',
         'product_suppliers' => 'Product Suppliers',
         'products' => 'The products',
-        'search' => 'Search',
         'shop_groups' => 'Shop groups from multi-shop feature',
         'shops' => 'Shops from multi-shop feature',
         'specific_price_rules' => 'Specific price management',
@@ -233,7 +221,7 @@ class psCli extends StdClass {
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
-        psOut::$oformat = self::getarg("output-format", $options, "cli");
+        psOut::$oformat = self::getarg("output-format|F", $options, "cli");
         self::$properties = self::reverseProps(self::getarg("properties", $options,Array(1=>"id")));
         if (!is_array(self::$properties)) {
             self::$properties=Array(self::$properties => self::P_CFG);
@@ -275,7 +263,7 @@ class psCli extends StdClass {
     }
     
     public function subobject($objects) {
-        switch ($objects) {
+	switch ($objects) {
             case "addresses":
                 return("address");
                 break;
@@ -288,12 +276,33 @@ class psCli extends StdClass {
     public function upobject($object) {
         switch ($object) {
             case "address":
-                return("addresses");
+                $ret="addresses";
                 break;
             default:
-                return($object."s");
+                $ret=$object."s";
                 break;
         }
+        if (!array_key_exists($ret,self::$resources)) {
+	    psOut::error("Bad resource $object! See help.");
+	} else {
+	    return($ret);
+	}
+    }
+    
+    public function helpResource() {
+	$ret="";
+	foreach (self::$resources as $r=>$d) {
+	    $ret.=sprintf("%-40s%s\n",self::subobject($r),$d);
+	}
+	return($ret);
+    }
+
+    public function helpResources() {
+	$ret="";
+	foreach (self::$resources as $r=>$d) {
+	    $ret.=sprintf("%-40s%s\n",$r,$d);
+	}
+	return($ret);
     }
     
     public function help() {

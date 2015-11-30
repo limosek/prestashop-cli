@@ -3,24 +3,25 @@
 require(__DIR__ . "/inc/common.php");
 
 try {
-    psList::init($argv);
-    $args = PsList::args($argv);
+    psCli::init($argv);
+    $args = psCli::args($argv);
     if (count($args) < 1) {
         PsOut::error("Error! Enter objects you want to list.\n" . basename(__FILE__)
-                . " {".join("|",array_keys(psCli::$resources))."} "
-                . "[filter]... [id]...\n"
+                . " resource [filter]... [id]...\n"
                 . "Filter(s) can be either id of object or\n"
                 . "property=value to match exactly\n"
                 . "property>value to match objects with property bigger than value\n"
                 . "property<value to match objects with property lower than value\n"
                 . "property~value to match objects with property matched by regexp\n"
-                . "property to match any value in property"
+                . "property to match any value in property.\n"
+                . "Available resources:\n"
+                . psCli::helpResources()
                 );
     }
     $objects = array_shift($args);
-    psList::readcfg(Array("global","list",$objects));
+    psCli::readcfg(Array("global","list",$objects));
     $object = psCli::subobject($objects);
-    $properties = psList::$properties;
+    $properties = psCli::$properties;
     $ids=Array();
     $filter=Array();
     foreach ($args as $arg) {
@@ -33,19 +34,19 @@ try {
     if (sizeof($filter)>0) {
         psFilter::create($filter);
     }
-    if (!psFilter::$enabled && count(psList::$properties)>1) {
+    if (!psFilter::$enabled && count(psCli::$properties)>1) {
         psOut::error("You cannot get any properties without filter.");
     }
-    $webService = new PrestaShopWebservice(psList::$shop_url, psList::$shop_key, false);
+    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
     $opt = array('resource' => $objects);
     psOut::progress("Getting data for $objects($object)...");
     $xml = $webService->get($opt);
-    $data = $xml->children();
+    $data = $xml->$objects->children();
     $row = 0;
     $rows = Array();
-    $cnt = sizeof($data->$objects->$object);
+    $cnt = sizeof($data);
     psOut::begin($objects, $object);
-    foreach ($data->$objects->$object as $r) {
+    foreach ($data as $r) {
         $rowdata = Array();
         $id = (string) $r["id"];
         if (sizeof($ids)>0 && !array_key_exists($id,$ids)) {
@@ -61,14 +62,12 @@ try {
                     psOut::msg("Filtering $object $id due to filter.\n");
                 continue;
             }
-            $rowdata = psGet::getValues($rowobject, psList::$properties);
+            $rowdata = psGet::getValues($xml->children()->$object, psCli::$properties);
             psOut::write(Array(
                 0 => $rowdata
             ));
         } else {
-            psOut::write(Array(
-                0 => Array("id" => (string) $id)
-            ));
+            psOut::write(Array("id" => (string) $id));
         }
         $row++;
     }

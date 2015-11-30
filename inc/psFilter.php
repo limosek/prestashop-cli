@@ -55,7 +55,7 @@ class psFilter extends StdClass {
                         $data=$obj->$attr;
                         $isset=isset($obj->$attr);
                     } else {
-                        psOut::error("Filter property $attr unknown! Available properties: ".join(",",array_flip(psGet::listProperties($obj))));
+                        psOut::error("Filter property $attr unknown! Available properties: ".join(",",psGet::getProperties($obj)));
                     }
                 }
                 if ($isset && !is_object($data)) {

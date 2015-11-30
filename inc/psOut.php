@@ -8,6 +8,7 @@ class psOut extends StdClass {
     static $buffered = false;
     static $context = false;
     static $category = "row";
+    const ESCAPECHARS = "\n\r\":|<>&;()[]*\$#!";
     
     public function write($data) {
         switch (self::$oformat) {
@@ -20,6 +21,8 @@ class psOut extends StdClass {
             case "xml": self::xml($data);
                 break;
             case "php": self::php($data);
+                break;
+            case "export": self::export($data);
                 break;
             default: self::error("Unknown output format " . self::$oformat);
         }
@@ -67,8 +70,13 @@ class psOut extends StdClass {
         }
     }
     
-    public function nl2slashes($str) {
-        return(preg_replace("/\r/m", '\r',preg_replace("/\n/m", '\n',$str)));
+    public function slashes($str) {
+        $ret=$str;
+        /*for ($i=0;$i<strlen(self::ESCAPECHARS);$i++) {
+            $char=substr(self::ESCAPECHARS,$i,1);
+            $ret=preg_replace("/\\$char/m","\\$char",$ret);
+        }*/
+        return(addcslashes($str,self::ESCAPECHARS));
     }
     
     public function ifbase64($var) {
@@ -97,61 +105,41 @@ class psOut extends StdClass {
     }
 
     public function cli($data) {
-        $row = 0;
-        reset($data);
-        foreach ($data as $line) {
-            foreach ($line as $column) {
-                echo self::expvar($column)." ";
+            foreach ($data as $column) {
+                echo self::slashes(self::expvar($column))." ";
             }
             echo "\n";
-            $row++;
-        }
     }
 
     public function csv($data) {
-        $row = 0;
-        reset($data);
-        foreach ($data as $line) {
-            if ($row == 0) {
-                foreach ($line as $column => $value) {
-                    echo "\"$column\";";
-                }
-                reset($line);
-                echo "\n";
-            }
-            foreach ($line as $column => $value) {
-                echo self::nl2slashes('"'.self::expvar($value).'";');
-            }
-            echo "\n";
-            $row++;
+        foreach ($data as $column => $value) {
+            echo '"' .  self::slashes(self::expvar($value)) . '";';
         }
+        echo "\n";
     }
 
     public function env($data) {
-        $row = 0;
-        reset($data);
-        foreach ($data as $line) {
-            foreach ($line as $column => $value) {
-                echo sprintf('%s="%s"; ',$column,addslashes(self::expvar($value)));
-            }
-            echo "\n";
-            $row++;
+        foreach ($data as $column => $value) {
+            echo sprintf('%s="%s"; ', $column, self::slashes(self::expvar($value)));
         }
+        echo "\n";
+    }
+
+    public function php($data) {
+        var_export($data);
     }
     
-    public function php($data) {
-        print_r($data);
+    public function export($data) {
+        echo base64_encode(serialize($data))."\n";
     }
     
     public function xml($data) {
-        $row=self::$category;
-        foreach ($data as $line) {
-            echo " <$row>\n";
-            foreach ($line as $column => $value) {
-                echo sprintf("  <%s>%s</%s>\n",$column,$value,$column);
-            }
-            echo " </$row>\n";
+        $row = self::$category;
+        echo " <$row>\n";
+        foreach ($data as $column => $value) {
+            echo sprintf("  <%s>%s</%s>\n", $column, $value, $column);
         }
+        echo " </$row>\n";
     }
 
 }
