@@ -26,7 +26,7 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 [get]
 ; Parameters for getting objects (to get their data)
 
-[get]
+[update]
 ; Parameters for updating objects
 
 [addresses]
@@ -70,10 +70,9 @@ $ ./list products 'price>10' id_manucacturer=1 # (logical and)
 ### Update product values ###
 ```
 $ ./update product 8 quantity=10 
-
+$ ./update product 8 quantity=10 price=20 # (set both values)
 ```
 
-```
 ## Output modes ##
 Available output modes: cli, csv, env, php
 ```
@@ -81,6 +80,7 @@ $ ./get product --output-mode=csv 8
 $ ./get product --output-format=xml 8
 $ ./get product --output-format=php 8
 $ ./get product --output-format=env 8
+```
 
 # Licence
 
