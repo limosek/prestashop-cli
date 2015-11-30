@@ -66,6 +66,7 @@ Filter operators are =,<,>,~,! (equal, less than, bigger than, regexp, not regex
 ```
 $ ./list products id_manucacturer=1
 $ ./list products 'price>10' id_manucacturer=1 # (logical and)
+```
 
 ### Update product values ###
 ```
