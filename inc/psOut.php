@@ -137,7 +137,7 @@ class psOut extends StdClass {
         $row = self::$category;
         echo " <$row>\n";
         foreach ($data as $column => $value) {
-            echo sprintf("  <%s>%s</%s>\n", $column, $value, $column);
+            echo sprintf("  <%s>%s</%s>\n", $column, self::expvar($value), $column);
         }
         echo " </$row>\n";
     }

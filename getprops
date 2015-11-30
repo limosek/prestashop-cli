@@ -6,7 +6,7 @@ try {
     psGet::init($argv);
     $args=PsGet::args($argv);
     if (count($args)<1) {
-        PsOut::error("Error! Enter object[s] you want to get variables.\n".basename(__FILE__)
+        PsOut::error("Error! Enter object[s] you want to get properities.\n".basename(__FILE__)
                 . " resource \n"
                 . "Available resources:\n"
                 . psCli::helpResource()
