@@ -4,18 +4,17 @@ require(__DIR__ . "/inc/common.php");
 
 try {
     psGet::init($argv);
-    $args=PsGet::args($argv);
+    $args=PsGet::$args;
+    $object=array_shift($args);
+    psGet::readcfg(Array("global","props",$object));
+    $args=PsGet::$args;
     if (count($args)<1) {
         PsOut::error("Error! Enter object[s] you want to get properities.\n".basename(__FILE__)
                 . " resource \n"
-                . "Available resources:\n"
-                . psCli::helpResource()
+                . "Use --help to get more informations\n"
                 . "\n");
     }
-    
-    $object=array_shift($args);
     $objects=psCli::upobject($object);
-    psGet::readcfg(Array("global","getvars",$objects));
     $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
     $opt = array('resource' => $objects);
     $xml = $webService->get($opt);

@@ -4,22 +4,22 @@ require(__DIR__ . "/inc/common.php");
 
 try {
     psGet::init($argv);
-    $args=PsGet::args($argv);
-    if (count($args)<3) {
-        PsOut::error("Error! Enter object[s] you want to update.\n".basename(__FILE__)
+    $args=PsGet::$args;
+    $object=array_shift($args);
+    psGet::readcfg(Array("global","update",$object));
+    $args=PsGet::$args;
+    array_shift($args);
+    if (count($args)<2) {
+        psOut::error("Error! Enter object[s] you want to update.\n".basename(__FILE__)
                 . " resource id property=value [property=value]...\n"
-                . "Available resources:\n"
-                . psCli::helpResource()
+                . "Use --help to get more informations\n"
                 . "\n");
     }
-    
-    $object=array_shift($args);
     $objects=psCli::upobject($object);
-    psGet::readcfg(Array("global","update",$objects));
     $objectid = array_shift($args);
     $update=psUpdate::create($args);
     if (!$update) {
-        psOut::error("Bad update syntax?");
+        psOut::error("Bad update syntax? Run without parameters to get more help.");
     }
     $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
     $opt = array('resource' => $objects);
@@ -29,7 +29,12 @@ try {
     $obj=$xml->children()->$object;
     $obj2=psUpdate::update($obj);
     $opt['putXml'] = $xml->asXML();
-    $xml = $webService->edit($opt);
+    if (psCli::$dry) {
+        print_r($xml);
+        psOut::msg("Dry mode. No modification made! See above if data are OK.\n");
+    } else {
+        $xml = $webService->edit($opt);
+    }
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors
     $trace = $e->getTrace();

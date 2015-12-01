@@ -14,8 +14,14 @@ class psUpdate extends StdClass {
             return(false);
         }
         foreach ($fstr as $f) {
-            if (preg_match("/(.*)=(.*)/", $f)) {
-                preg_match("/(.*)=(.*)/", $f, $farr);
+            if (preg_match("/(\w*)\+=(.*)/", $f)) {
+                preg_match("/(\w*)\+=(.*)/", $f, $farr);
+                $update["plus"][$farr[1]] = $farr[2];
+            } elseif (preg_match("/(\w*)\*=(.*)/", $f)) {
+                preg_match("/(\w*)\*=(.*)/", $f, $farr);
+                $update["multiply"][$farr[1]] = $farr[2];
+            } elseif (preg_match("/(\w*)=(.*)/", $f)) {
+                preg_match("/(\w*)=(.*)/", $f, $farr);
                 $update["set"][$farr[1]] = $farr[2];
             } else {
                 psOut::error("Bad update syntax!");
@@ -31,6 +37,12 @@ class psUpdate extends StdClass {
                 switch ($op) {
                     case "set":
                         $obj->$prop = $val;
+                        break;
+                    case "plus":
+                        $obj->$prop += $val;
+                        break;
+                    case "multiply":
+                        $obj->$prop *= $val;
                         break;
                 }
             }

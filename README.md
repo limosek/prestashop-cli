@@ -1,18 +1,28 @@
 # Prestashop CLI utils
 
-This software is used to communicate with Prestashop via its API and to get/modify data inside. 
+This software is used to communicate with Prestashop via its WWW API and to get/modify data inside. 
+It is not for managing installation of prestashop or automatizing updates. It is used to communicate via WWW interface
+with Prestashop and do some usefull things. Data manipulation can be done absolutely externally from Prestashop.
+If you know your shell and it's power and you need to bulk edit your Prestashop internal data, this project is probably for you.
+Please take care when modifying your data! Always backup your Prestashop before use! It is good practice to create web api key 
+with readonly access (or minimal access) to test everything.
 
 # Howto
 
 ## Installation ##
-prestasoph-cli needs php5 cli and PHP pear package. On debian systems, use:
+Prestasoph-cli needs php5 cli and PHP pear package. It is theoreticaly possible to run this software on Windows using Cygwin
+but it is not tested. On debian systems, use:
 ```
-sudo apt-get install php5-cli php-pear php5-curl
+$ sudo apt-get install php5-cli php-pear php5-curl git
+$ git clone https://github.com/limosek/prestashop-cli.git
+$ cd prestashop-cli
+$ {pslist|psget|psprops|psupdate|psdel} [options]
 ```
 
 ## Configuration ##
-First, enable API access in your Prestashop and create API token. Next, create file ~/.psclirc with configuration:
-
+First, enable API access in your Prestashop and create API token.
+You can use this documentation: http://doc.prestashop.com/display/PS16/Web+service+one-page+documentation
+Next, create file ~/.psclirc with your configuration:
 ```
 [global]
 ; Global config for all operations
@@ -28,6 +38,10 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 [update]
 ; Parameters for updating objects
+
+[delete]
+; Parameters for updating objects
+
 
 [addresses]
 ; Parameters for geting specific kind of objects

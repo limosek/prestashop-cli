@@ -16,7 +16,8 @@ class psCli extends StdClass {
         "output-format=",
         "properties=",
         "base64",
-        "buffered"
+        "buffered",
+        "dry"
     );
     static $resources = Array(
         'addresses' => 'The Customer, Manufacturer and Customer addresses',
@@ -100,6 +101,7 @@ class psCli extends StdClass {
     static $goptions = false;
     static $foptions = false;
     static $properties;
+    static $dry;
     static $args = false;
 
     /**
@@ -129,6 +131,10 @@ class psCli extends StdClass {
         self::$args = $opts[1];
         self::$goptions = self::condense_arguments($opts);
         self::$cfgfile = self::getarg("config-file", self::$goptions, getenv("HOME") . "/.psclirc");
+        if (array_key_exists("--help",self::$goptions)) {
+            self::help();
+            exit;
+        }
     }
     
     private function condense_arguments($params) {
@@ -218,6 +224,7 @@ class psCli extends StdClass {
             ob_start();
         }
         self::$debug = self::isarg("debug|d", $options);
+        self::$dry= self::isarg("dry", $options);
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
@@ -226,15 +233,16 @@ class psCli extends StdClass {
         if (!is_array(self::$properties)) {
             self::$properties=Array(self::$properties => self::P_CFG);
         }
+        if (array_key_exists("args",$foptions)) {
+            self::$args=Array_merge(self::$args,$foptions["args"]);
+        }
         if (self::$debug) {
+            psOut::msg("Config file sections:\n" . print_r($contexts, true));
             psOut::msg("Config and CLI options:\n" . print_r($options, true));
+            psOut::msg("CLI arguments:\n" . print_r(self::$args, true));
             psOut::msg("Properties to get:\n" . print_r(self::$properties, true));
         }
         self::$options = $options;
-        if (self::isarg("help|h", $options)) {
-            self::help();
-            exit;
-        }
         return($options);
     }
     
@@ -249,23 +257,17 @@ class psCli extends StdClass {
         }
         return($out);
     }
-
-    public function args($args) {
-        $ret = Array();
-        foreach ($args as $idx => $arg) {
-            if ($idx == 0)
-                continue;
-            if ($arg[0] != "-") {
-                $ret[] = $arg;
-            }
-        }
-        return($ret);
-    }
     
     public function subobject($objects) {
 	switch ($objects) {
             case "addresses":
                 return("address");
+                break;
+            case "taxes":
+                return("tax");
+                break;
+             case "deliveries":
+                return("delivery");
                 break;
             default:
                 return(substr($objects,0,-1));
@@ -277,6 +279,12 @@ class psCli extends StdClass {
         switch ($object) {
             case "address":
                 $ret="addresses";
+                break;
+            case "tax":
+                $ret="taxes";
+                break;
+            case "delivery":
+                $ret="deliveries";
                 break;
             default:
                 $ret=$object."s";
@@ -306,10 +314,22 @@ class psCli extends StdClass {
     }
     
     public function help() {
-        psOut::msg("Common options:\n");
-        psOut::msg("--help        This help\n");
-        psOut::msg("--verbose     Be verbose\n");
-        psOut::msg("--debug       Enable debug output\n");
+        psOut::msg("\nCommon options:\n");
+        psOut::msg("--help                  This help\n");
+        psOut::msg("--buffered              Buffered output\n");
+        psOut::msg("--progress              See progress messages\n");
+        psOut::msg("--debug                 Enable debug output\n");
+        psOut::msg("--output-format=x       Set output format\n");
+        psOut::msg("--base64                Use base64 in output\n");
+        psOut::msg("--dry                   Do not update anything. Just simulate.\n\n");
+        psOut::msg("Available resources:\n");
+        if (PSCMD=="list") {
+            psOut::msg(psCli::helpResources()."\n");
+        } else {
+            psOut::msg(psCli::helpResource()."\n");
+        }
+        psOut::help();
+        psOut::msg("To see command specific help, run it without parameters.\n\n");
     }
 
 }

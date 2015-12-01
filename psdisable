@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "$0 resource id" >&2
+    exit 1
+else
+    exec $(dirname $0)/psupdate $* active=0
+fi

@@ -1,11 +1,16 @@
 #!/usr/bin/env php
 <?php
 require(__DIR__ . "/inc/common.php");
+define("PSCMD","list");
 
 try {
     psCli::init($argv);
-    $args = psCli::args($argv);
-    if (count($args) < 1) {
+    $args = psCli::$args;
+    $objects = array_shift($args);
+    psCli::readcfg(Array("global","list",$objects));
+    $args=psCli::$args;
+    array_shift($args);
+    if (strlen($objects)==0) {
         PsOut::error("Error! Enter objects you want to list.\n" . basename(__FILE__)
                 . " resource [filter]... [id]...\n"
                 . "Filter(s) can be either id of object or\n"
@@ -14,12 +19,9 @@ try {
                 . "property<value to match objects with property lower than value\n"
                 . "property~value to match objects with property matched by regexp\n"
                 . "property to match any value in property.\n"
-                . "Available resources:\n"
-                . psCli::helpResources()
+                . "Use --help to get more informations\n\n"
                 );
     }
-    $objects = array_shift($args);
-    psCli::readcfg(Array("global","list",$objects));
     $object = psCli::subobject($objects);
     $properties = psCli::$properties;
     $ids=Array();
@@ -33,6 +35,9 @@ try {
     }
     if (sizeof($filter)>0) {
         psFilter::create($filter);
+    }
+    if (psCli::$debug) {
+        psOut::msg("Filter: ".print_r($filter,true)."\n");
     }
     if (!psFilter::$enabled && count(psCli::$properties)>1) {
         psOut::error("You cannot get any properties without filter.");
@@ -63,9 +68,7 @@ try {
                 continue;
             }
             $rowdata = psGet::getValues($xml->children()->$object, psCli::$properties);
-            psOut::write(Array(
-                0 => $rowdata
-            ));
+            psOut::write($rowdata);
         } else {
             psOut::write(Array("id" => (string) $id));
         }

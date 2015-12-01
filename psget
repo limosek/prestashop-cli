@@ -1,22 +1,23 @@
 #!/usr/bin/env php
 <?php
 require(__DIR__ . "/inc/common.php");
+define("PSCMD","get");
 
 try {
     psGet::init($argv);
-    $args=PsGet::args($argv);
-    if (count($args)<2) {
+    $args=PsGet::$args;
+    $object=array_shift($args);
+    psGet::readcfg(Array("global","get",$object));
+    $args=PsGet::$args;
+    array_shift($args);
+    if (count($args)<1) {
         PsOut::error("Error! Enter object[s] you want to get.\n".basename(__FILE__)
                 . " resource id [property]...\n"
                 . "Property '*' or empty properties means everything.\n"
-                . "Available resources:\n"
-                . psCli::helpResource()
+                . "Use --help to see available resources\n"
                 . "\n");
     }
-    
-    $object=array_shift($args);
     $objects=psCli::upobject($object);
-    psGet::readcfg(Array("global","get",$objects));
     $objectid = array_shift($args);
     $properties = array_flip($args);
     if (sizeof($properties)==0) {
