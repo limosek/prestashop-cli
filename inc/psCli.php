@@ -101,6 +101,8 @@ class psCli extends StdClass {
     static $goptions = false;
     static $foptions = false;
     static $properties;
+    static $apifields = Array("id" => 1);
+    static $apifilter = Array();
     static $dry;
     static $args = false;
 
@@ -269,6 +271,9 @@ class psCli extends StdClass {
              case "deliveries":
                 return("delivery");
                 break;
+            case "categories":
+                return("category");
+                break;
             default:
                 return(substr($objects,0,-1));
                 break;
@@ -285,6 +290,9 @@ class psCli extends StdClass {
                 break;
             case "delivery":
                 $ret="deliveries";
+                break;
+            case "category":
+                $ret="categories";
                 break;
             default:
                 $ret=$object."s";
@@ -321,6 +329,7 @@ class psCli extends StdClass {
         psOut::msg("--debug                 Enable debug output\n");
         psOut::msg("--output-format=x       Set output format\n");
         psOut::msg("--base64                Use base64 in output\n");
+        psOut::msg("--language              Set id of language to use for text operations. Defaults to 1.\n");
         psOut::msg("--dry                   Do not update anything. Just simulate.\n\n");
         psOut::msg("Available resources:\n");
         if (PSCMD=="list") {

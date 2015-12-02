@@ -44,8 +44,21 @@ try {
     }
     $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
     $opt = array('resource' => $objects);
+    if (psCli::$apifields) {
+        $opt['display']="[".join(",",array_keys(psCli::$apifields))."]";
+    }
+    if (sizeof(psCli::$apifilter)>0) {
+        foreach (psCli::$apifilter as $f =>$v) {
+            $opt["filter[$f]"]="[$v]";
+        }
+    }
+    if (psCli::$debug) {
+        psOut::msg("Options passed to api:\n");
+        print_r($opt);
+    }
     psOut::progress("Getting data for $objects($object)...");
     $xml = $webService->get($opt);
+    psOut::progress(sprintf("Got %d objects.                   ",count($xml->$objects->children())));
     $data = $xml->$objects->children();
     $row = 0;
     $rows = Array();
@@ -57,20 +70,17 @@ try {
         if (sizeof($ids)>0 && !array_key_exists($id,$ids)) {
             continue;
         }
+        $rowdata = psGet::getValues($r, psCli::$properties);
         if (psFilter::$enabled) {
             psOut::progress(false, $row, $cnt);
-            $opt['id'] = $id;
-            $xml = $webService->get($opt);
-            $rowobject = json_decode(json_encode($xml->children()->$object));
-            if (psFilter::$enabled && psFilter::isFiltered($rowobject)) {
+            if (psFilter::$enabled && psFilter::isFiltered($r)) {
                 if (psCli::$debug)
                     psOut::msg("Filtering $object $id due to filter.\n");
                 continue;
             }
-            $rowdata = psGet::getValues($xml->children()->$object, psCli::$properties);
             psOut::write($rowdata);
         } else {
-            psOut::write(Array("id" => (string) $id));
+            psOut::write($rowdata);
         }
         $row++;
     }

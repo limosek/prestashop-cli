@@ -17,20 +17,27 @@ class psFilter extends StdClass {
         foreach ($fstr as $f) {
             if (preg_match("/(.*)=(.*)/", $f)) {
                 preg_match("/(.*)=(.*)/", $f, $farr);
+                psCli::$apifields[$farr[1]]=1;
+                psCli::$apifilter[$farr[1]]=$farr[2];
                 $filter["eq"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)>(.*)/", $f)) {
                 preg_match("/(.*)>(.*)/", $f, $farr);
+                psCli::$apifields[$farr[1]]=1;
                 $filter["gt"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)<(.*)/", $f)) {
                 preg_match("/(.*)<(.*)/", $f, $farr);
+                psCli::$apifields[$farr[1]]=1;
                 $filter["lt"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)~(.*)/", $f)) {
                 preg_match("/(.*)~(.*)/", $f, $farr);
+                psCli::$apifields[$farr[1]]=1;
                 $filter["re"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)!(.*)/", $f)) {
                 preg_match("/(.*)!(.*)/", $f, $farr);
+                psCli::$apifields[$farr[1]]=1;
                 $filter["nre"][$farr[1]] = $farr[2];
             } else {
+                psCli::$apifields[$f]=1;
                 $filter["re"][$f] = "(.*)";
             }
         }
@@ -43,25 +50,23 @@ class psFilter extends StdClass {
         if (!is_array(self::$filter) || count(self::$filter) == 0)
             return(false);
 
-        reset(self::$filter);
         $fout = false;
         foreach (self::$filter as $type => $f) {
             foreach ($f as $attr => $val) {
-                if (isset($obj->$attr->language)) {
-                    $data=$obj->$attr->language[psCli::$lang];
-                    $isset=array_key_exists(psCli::$lang,$obj->$attr->language);
+                if (psGet::getLanguageObj($obj->$attr,$attr)) {
+                    $isset=psGet::getLanguageObj($obj->$attr,$attr);
                 } else {
                     if (isset($obj->$attr)) {
-                        $data=$obj->$attr;
+                        $data=(string) $obj->$attr;
                         $isset=isset($obj->$attr);
                     } else {
                         psOut::error("Filter property $attr unknown! Available properties: ".join(",",psGet::getProperties($obj)));
                     }
                 }
-                if ($isset && !is_object($data)) {
+                if ($isset) {
                     switch ($type) {
                         case "eq":
-                            if (!$data == $val) {
+                            if (!($data == $val)) {
                                 $fout = true;
                                 $fwhy = "$attr=$val";
                             }

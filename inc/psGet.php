@@ -23,7 +23,7 @@ class psGet extends psCli {
             if (!is_object($arr->$p)) {
                 $row[$p] = $arr->$p;
             } elseif (isset($arr->$p->language)) {
-                $row[$p] = $arr->$p->language[psCli::$lang];
+                $row[$p] = (string) self::getLanguageObj($obj->$p,$p);
             } else {
                 $row[$p] = null;
             }
@@ -33,6 +33,14 @@ class psGet extends psCli {
 
     public function getProperties($obj) {
         return(array_keys(get_object_vars($obj)));
+    }
+    
+    public function getLanguageObj($obj,$path) {
+        if (isset($obj->language)) {
+            return($obj->xpath(sprintf("//$path/language[@id=%d]",self::$lang))[0]);
+        } else {
+            return(false);
+        }
     }
 
 }

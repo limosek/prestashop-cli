@@ -26,14 +26,27 @@ try {
     psOut::progress("Getting data for $objects($object)...");
     $opt['id'] = $objectid;
     $xml = $webService->get($opt);
-    $obj=$xml->children()->$object;
-    $obj2=psUpdate::update($obj);
+    $basefile=tempnam("/tmp","pscli");
+    $origfile="$basefile.old";
+    $newfile="$basefile.new";
+    if (psCli::$debug || psCli::$dry) {
+        $xml->asXML($origfile);
+    }
+    psUpdate::update($xml->children()->$object);
     $opt['putXml'] = $xml->asXML();
     if (psCli::$dry) {
-        print_r($xml);
+        $xml->asXML($newfile);
+        $d=popen("diff $origfile $newfile","r");
+        fpassthru($d);
         psOut::msg("Dry mode. No modification made! See above if data are OK.\n");
     } else {
         $xml = $webService->edit($opt);
+    }
+    if (!psCli::$debug) {
+        if (file_exists($origfile)) unlink($origfile);
+        if (file_exists($newfile)) unlink($newfile);
+    } else {
+        psOut::msg("See $origfile and $newfile to compare changes.\n");
     }
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors

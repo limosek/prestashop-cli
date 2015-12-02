@@ -64,9 +64,9 @@ class psOut extends StdClass {
     public function progress($msg=false,$num=false,$cnt=false) {
         if (self::$progress) {
             if ($msg) {
-                psOut::msg("$msg    \r");
+                psOut::msg("Progress: $msg\n");
             } else {
-                psOut::msg(sprintf("Progress: %d of %d objects...    \r",$num,$cnt));
+                psOut::msg(sprintf("Progress: %d of %d objects...    \n",$num,$cnt));
             }
             flush();
         }
@@ -90,16 +90,7 @@ class psOut extends StdClass {
     }
     
     public function expvar($var) {
-        if (is_object($var)) {
-            if (isset($var->language) && array_key_exists(psCli::$lang,$var->language)) {
-                return(self::ifbase64($var->language[psCli::$lang]));
-            } elseif (isset($var->language) && !array_key_exists(psCli::$lang,$var->language)) {
-                return(null);
-            } else {
-                //return(print_r($var,true));
-                return(null);
-            }
-        } elseif (is_array($var)) {
+        if (is_array($var) || is_object($var)) {
             return(self::ifbase64(print_r($var,true)));
         } else {
             return(self::ifbase64($var));
