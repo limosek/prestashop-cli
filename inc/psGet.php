@@ -37,7 +37,12 @@ class psGet extends psCli {
     
     public function getLanguageObj($obj,$path) {
         if (isset($obj->language)) {
-            return($obj->xpath(sprintf("//$path/language[@id=%d]",self::$lang))[0]);
+            foreach ($obj->language as $o) {
+                if ((int) $o["id"] == self::$lang) {
+                    return($o);
+                }
+            }
+            return(false);
         } else {
             return(false);
         }

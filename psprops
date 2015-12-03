@@ -21,8 +21,10 @@ try {
     $opt['id'] = (string) $xml->$objects->children()[0]["id"];
     $xml = $webService->get($opt);
     $rowobject = json_decode(json_encode($xml->children()->$object));
-    $rowdata=psGet::getProperties($xml->children()->$object);
-    psOut::write($rowdata);
+    $rowdata=psGet::getProperties(psCli::filterProps($xml->children()->$object));
+    foreach ($rowdata as $p) {
+        echo  $p."\n";
+    }
     psOut::end($object);
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors

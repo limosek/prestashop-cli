@@ -81,14 +81,26 @@ class psCli extends StdClass {
         'weight_ranges' => 'Weight ranges',
         'zones' => 'The Countries zones',
     );
+    static $propfeatures = Array(
+        "*" => Array(
+            "associations" => self::P_BAD
+        ),
+        "product" => Array(
+            "id" => self::P_REQUIRED,
+            "manufacturer_name" => self::P_RO,
+            "quantity" => self::P_RO
+        )
+    );
 
     const E_URL = 2;
     const E_KEY = 3;
     const E_MISSOPT = 4;
-    
     const P_DEFAULT = -1;
     const P_CFG = -2;
     const P_FILTER = -3;
+    const P_RO = 1;
+    const P_REQUIRED = 2;
+    const P_BAD = 3;
 
     static $cfgfile;
     static $shop_url;
@@ -112,7 +124,7 @@ class psCli extends StdClass {
      * @param array $contexts Contexts to read from cfg file
      * @return array Array of parsed options
      */
-    public function init($argv, $contexts=false) {
+    public function init($argv, $contexts = false) {
         psOut::$log = fopen('php://stderr', 'w+');
         if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
             $shortopts = array_merge(self::$shortopts, parent::$shortopts);
@@ -133,12 +145,12 @@ class psCli extends StdClass {
         self::$args = $opts[1];
         self::$goptions = self::condense_arguments($opts);
         self::$cfgfile = self::getarg("config-file", self::$goptions, getenv("HOME") . "/.psclirc");
-        if (array_key_exists("--help",self::$goptions)) {
+        if (array_key_exists("--help", self::$goptions)) {
             self::help();
             exit;
         }
     }
-    
+
     private function condense_arguments($params) {
         $new_params = array();
         foreach ($params[0] as $param) {
@@ -190,17 +202,18 @@ class psCli extends StdClass {
     public function readcfg($contexts) {
         if (file_exists(self::$cfgfile)) {
             $allfoptions = parse_ini_file(self::$cfgfile, true);
-            $foptions=Array();
-            if (!$contexts) $contexts=Array("global");
+            $foptions = Array();
+            if (!$contexts)
+                $contexts = Array("global");
             foreach ($contexts as $context) {
-                if (array_key_exists($context,$allfoptions)) {
-                    $foptions = array_merge($foptions,$allfoptions[$context]);
+                if (array_key_exists($context, $allfoptions)) {
+                    $foptions = array_merge($foptions, $allfoptions[$context]);
                 }
             }
         } else {
             $foptions = Array();
         }
-        $options=Array();
+        $options = Array();
         foreach ($foptions as $opt => $val) {
             if ($val)
                 $options[$opt] = $val;
@@ -219,24 +232,25 @@ class psCli extends StdClass {
         if (!self::$shop_key) {
             self::error("Shop key not set!", self::E_MISSOPT);
         }
-        self::$lang = self::getarg("language|L", $options,1);
+        self::$lang = self::getarg("language|L", $options, 1);
         self::$long = self::isarg("long|l", $options);
         psOut::$buffered = self::isarg("buffered", $options);
         if (psOut::$buffered) {
             ob_start();
         }
         self::$debug = self::isarg("debug|d", $options);
-        self::$dry= self::isarg("dry", $options);
+        self::$dry = self::isarg("dry", $options);
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
-        self::$properties = self::reverseProps(self::getarg("properties", $options,Array(1=>"id")));
+        self::$properties = self::reverseProps(self::getarg("properties", $options, Array(1 => "id")));
         if (!is_array(self::$properties)) {
-            self::$properties=Array(self::$properties => self::P_CFG);
+            self::$properties = Array(self::$properties => self::P_CFG);
         }
-        if (array_key_exists("args",$foptions)) {
-            self::$args=Array_merge(self::$args,$foptions["args"]);
+        self::$apifields = array_merge(self::$properties, self::$apifields);
+        if (array_key_exists("args", $foptions)) {
+            self::$args = Array_merge(self::$args, $foptions["args"]);
         }
         if (self::$debug) {
             psOut::msg("Config file sections:\n" . print_r($contexts, true));
@@ -247,80 +261,99 @@ class psCli extends StdClass {
         self::$options = $options;
         return($options);
     }
-    
+
     public function reverseProps($properties) {
-        $out=Array();
+        $out = Array();
         if (is_array($properties)) {
             foreach ($properties as $p) {
-                $out[$p]=self::P_CFG;
+                $out[$p] = self::P_CFG;
             }
         } else {
             return(Array($properties => self::P_CFG));
         }
         return($out);
     }
-    
+
+    public function filterProps($obj) {
+        $name = $obj->getName();
+        $dom = dom_import_simplexml($obj);
+
+        foreach (self::$propfeatures["*"] as $p => $v) {
+            if ($v == self::P_BAD) {
+                $dom->removeChild($dom->getElementsByTagName($p)[0]);
+            }
+        }
+        if (array_key_exists($name, psCli::$propfeatures)) {
+            foreach (self::$propfeatures[$name] as $p => $v) {
+                if ($v == self::P_BAD) {
+                    $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                }
+            }
+        }
+        return($obj);
+    }
+
     public function subobject($objects) {
-	switch ($objects) {
+        switch ($objects) {
             case "addresses":
                 return("address");
                 break;
             case "taxes":
                 return("tax");
                 break;
-             case "deliveries":
+            case "deliveries":
                 return("delivery");
                 break;
             case "categories":
                 return("category");
                 break;
             default:
-                return(substr($objects,0,-1));
+                return(substr($objects, 0, -1));
                 break;
         }
     }
-    
+
     public function upobject($object) {
         switch ($object) {
             case "address":
-                $ret="addresses";
+                $ret = "addresses";
                 break;
             case "tax":
-                $ret="taxes";
+                $ret = "taxes";
                 break;
             case "delivery":
-                $ret="deliveries";
+                $ret = "deliveries";
                 break;
             case "category":
-                $ret="categories";
+                $ret = "categories";
                 break;
             default:
-                $ret=$object."s";
+                $ret = $object . "s";
                 break;
         }
-        if (!array_key_exists($ret,self::$resources)) {
-	    psOut::error("Bad resource $object! See help.");
-	} else {
-	    return($ret);
-	}
+        if (!array_key_exists($ret, self::$resources)) {
+            psOut::error("Bad resource $object! See help.");
+        } else {
+            return($ret);
+        }
     }
-    
+
     public function helpResource() {
-	$ret="";
-	foreach (self::$resources as $r=>$d) {
-	    $ret.=sprintf("%-40s%s\n",self::subobject($r),$d);
-	}
-	return($ret);
+        $ret = "";
+        foreach (self::$resources as $r => $d) {
+            $ret.=sprintf("%-40s%s\n", self::subobject($r), $d);
+        }
+        return($ret);
     }
 
     public function helpResources() {
-	$ret="";
-	foreach (self::$resources as $r=>$d) {
-	    $ret.=sprintf("%-40s%s\n",$r,$d);
-	}
-	return($ret);
+        $ret = "";
+        foreach (self::$resources as $r => $d) {
+            $ret.=sprintf("%-40s%s\n", $r, $d);
+        }
+        return($ret);
     }
-    
+
     public function help() {
         psOut::msg("\nCommon options:\n");
         psOut::msg("--help                  This help\n");
@@ -332,10 +365,10 @@ class psCli extends StdClass {
         psOut::msg("--language              Set id of language to use for text operations. Defaults to 1.\n");
         psOut::msg("--dry                   Do not update anything. Just simulate.\n\n");
         psOut::msg("Available resources:\n");
-        if (PSCMD=="list") {
-            psOut::msg(psCli::helpResources()."\n");
+        if (PSCMD == "list") {
+            psOut::msg(psCli::helpResources() . "\n");
         } else {
-            psOut::msg(psCli::helpResource()."\n");
+            psOut::msg(psCli::helpResource() . "\n");
         }
         psOut::help();
         psOut::msg("To see command specific help, run it without parameters.\n\n");

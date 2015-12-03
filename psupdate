@@ -11,7 +11,14 @@ try {
     array_shift($args);
     if (count($args)<2) {
         psOut::error("Error! Enter object[s] you want to update.\n".basename(__FILE__)
-                . " resource id property=value [property=value]...\n"
+                . " resource id property<op>value [property<op>value]...\n"
+                . "<op> means operation:\n"
+                . "property=value               Set property to value\n"
+                . "property+=value              Add value to property\n"
+                . "property*=value              Multiply property by value\n"
+                . "property.=string             Concat string to the right to property\n"
+                . "property=.string             Concat string to left of property\n"
+                . "property~=string/replace     Replace regexp string to replace\n"
                 . "Use --help to get more informations\n"
                 . "\n");
     }
@@ -21,7 +28,7 @@ try {
     if (!$update) {
         psOut::error("Bad update syntax? Run without parameters to get more help.");
     }
-    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
+    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
     $opt = array('resource' => $objects);
     psOut::progress("Getting data for $objects($object)...");
     $opt['id'] = $objectid;
@@ -34,6 +41,9 @@ try {
     }
     psUpdate::update($xml->children()->$object);
     $opt['putXml'] = $xml->asXML();
+    if (psCli::$debug) {
+        psOut::msg($xml->asXML()."\n");
+    }
     if (psCli::$dry) {
         $xml->asXML($newfile);
         $d=popen("diff $origfile $newfile","r");
@@ -41,12 +51,6 @@ try {
         psOut::msg("Dry mode. No modification made! See above if data are OK.\n");
     } else {
         $xml = $webService->edit($opt);
-    }
-    if (!psCli::$debug) {
-        if (file_exists($origfile)) unlink($origfile);
-        if (file_exists($newfile)) unlink($newfile);
-    } else {
-        psOut::msg("See $origfile and $newfile to compare changes.\n");
     }
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors

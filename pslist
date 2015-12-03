@@ -12,13 +12,14 @@ try {
     array_shift($args);
     if (strlen($objects)==0) {
         PsOut::error("Error! Enter objects you want to list.\n" . basename(__FILE__)
-                . " resource [filter]... [id]...\n"
-                . "Filter(s) can be either id of object or\n"
+                . " resource [filter]... [id]... [property]\n"
+                . "Filter(s):\n"
                 . "property=value to match exactly\n"
                 . "property>value to match objects with property bigger than value\n"
                 . "property<value to match objects with property lower than value\n"
                 . "property~value to match objects with property matched by regexp\n"
-                . "property to match any value in property.\n"
+                . "id to match only objects with this ids\n"
+                . "property to output given property.\n"
                 . "Use --help to get more informations\n\n"
                 );
     }
@@ -42,7 +43,7 @@ try {
     if (!psFilter::$enabled && count(psCli::$properties)>1) {
         psOut::error("You cannot get any properties without filter.");
     }
-    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
+    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
     $opt = array('resource' => $objects);
     if (psCli::$apifields) {
         $opt['display']="[".join(",",array_keys(psCli::$apifields))."]";
@@ -65,7 +66,6 @@ try {
     $cnt = sizeof($data);
     psOut::begin($objects, $object);
     foreach ($data as $r) {
-        $rowdata = Array();
         $id = (string) $r["id"];
         if (sizeof($ids)>0 && !array_key_exists($id,$ids)) {
             continue;

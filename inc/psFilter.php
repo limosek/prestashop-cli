@@ -38,6 +38,7 @@ class psFilter extends StdClass {
                 $filter["nre"][$farr[1]] = $farr[2];
             } else {
                 psCli::$apifields[$f]=1;
+                psCli::$properties[$f]=1;
                 $filter["re"][$f] = "(.*)";
             }
         }
