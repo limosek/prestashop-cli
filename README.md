@@ -19,8 +19,7 @@ Of course you can send some donations to bitcoin address 1EaKkkLKqC6f9DiMPUfMvbR
 Prestasoph-cli needs php5 cli and PHP pear package. It is theoreticaly possible to run this software on Windows using Cygwin
 but it is not tested. On debian systems, use:
 ```
-$ sudo apt-get install php5-cli php-pear php5-curl git
-$ sudo pear install console_getopt cache_lite
+$ sudo apt-get install php5-cli php5-curl git
 $ git clone https://github.com/limosek/prestashop-cli.git
 $ cd prestashop-cli
 $ . env.sh
@@ -40,6 +39,10 @@ Next, create file ~/.psclirc with your configuration:
 debug=false
 shop-url=http://yourshop.domain
 shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+; Uncomment to enable caching
+;cache=true
+;cache-dir=/tmp/
+;cache-lifetime=3600
 
 [list]
 ; Parameters for listing objects (to get their ids)

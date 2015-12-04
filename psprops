@@ -15,11 +15,11 @@ try {
                 . "\n");
     }
     $objects=psCli::upobject($object);
-    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
+    psCli::initApi();
     $opt = array('resource' => $objects);
-    $xml = $webService->get($opt);
+    $xml = psCli::apiCmd("get",$opt);
     $opt['id'] = (string) $xml->$objects->children()[0]["id"];
-    $xml = $webService->get($opt);
+    $xml = psCli::apiCmd("get",$opt);
     $rowobject = json_decode(json_encode($xml->children()->$object));
     $rowdata=psGet::getProperties(psCli::filterProps($xml->children()->$object));
     foreach ($rowdata as $p) {

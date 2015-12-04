@@ -13,6 +13,9 @@ class psCli extends StdClass {
         "debug",
         "verbose",
         "progress",
+        "cache",
+        "cache-dir=",
+        "cache-lifetime=",
         "output-format=",
         "properties=",
         "base64",
@@ -123,6 +126,10 @@ class psCli extends StdClass {
     static $apifilter = Array();
     static $dry;
     static $args = false;
+    static $api;
+    static $cache;
+    static $cachedir;
+    static $cachelife;
 
     /**
      * 
@@ -250,6 +257,9 @@ class psCli extends StdClass {
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
+        self::$cache = self::isarg("cache", $options, false);
+        self::$cachedir = self::getarg("cache-dir", $options, "/tmp/");
+        self::$cachelife = self::getarg("cache-lifetime", $options, 3600);
         self::$properties = self::reverseProps(self::getarg("properties", $options, Array(1 => "id")));
         if (!is_array(self::$properties)) {
             self::$properties = Array(self::$properties => self::P_CFG);
@@ -266,6 +276,27 @@ class psCli extends StdClass {
         }
         self::$options = $options;
         return($options);
+    }
+    
+    public function initApi() {
+	self::$api = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
+    }
+    
+    public function apiCmd($cmd,$opt) {
+	$Cache_Lite = new Cache_Lite(array(
+	    'cacheDir' => self::$cachedir,
+	    'lifeTime' => self::$cachelife
+	));
+	$id=md5(psCli::$shop_url.psCli::$shop_key.$cmd.serialize($opt));
+	if (self::$cache && $data = $Cache_Lite->get($id)) {
+	  $xml=New SimpleXMLElement($data);
+	  psOut::progress("Done (from cache).");
+	} else {
+	  $xml = self::$api->$cmd($opt);
+	  if (self::$cache ) $Cache_Lite->save($xml->asXML(), $id);
+	  psOut::progress("Done.");
+	}
+	return($xml);
     }
 
     public function reverseProps($properties) {
@@ -286,16 +317,18 @@ class psCli extends StdClass {
 
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {
-                if ($v && self::P_BAD) {
+                if (isset($obj->$p) && $v && self::P_BAD) {
                     if (is_object($dom->getElementsByTagName($p)[0])) {
+			psOut::debug("Filtering $p");
                         $dom->removeChild($dom->getElementsByTagName($p)[0]);
                     }
                 }
             }
         } else {
             foreach (self::$propfeatures["*"] as $p => $v) {
-                if ($v && self::P_BAD) {
-                    if (is_object($dom->getElementsByTagName($p)[0])) {
+                if (isset($obj->$p) && $v && self::P_BAD) {
+                    if (is_object($dom->getElementsByTagName($p))[0]) {
+			psOut::debug("Filtering $p");
                         $dom->removeChild($dom->getElementsByTagName($p)[0]);
                     }
                 }
@@ -373,6 +406,9 @@ class psCli extends StdClass {
         psOut::msg("--debug                 Enable debug output\n");
         psOut::msg("--output-format=x       Set output format\n");
         psOut::msg("--base64                Use base64 in output\n");
+        psOut::msg("--cache                 Enable caching (default disable)\n");
+        psOut::msg("--cache-dir             Cache diectory (default /tmp/)\n");
+        psOut::msg("--cache-lifetime        Cache time in seconds (default 3600s)\n");
         psOut::msg("--language              Set id of language to use for text operations. Defaults to 1.\n");
         psOut::msg("--dry                   Do not update anything. Just simulate.\n\n");
         psOut::msg("Available resources:\n");

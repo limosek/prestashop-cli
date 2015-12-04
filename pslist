@@ -40,7 +40,7 @@ try {
     if (psCli::$debug) {
         psOut::msg("Filter: ".print_r($filter,true)."\n");
     }
-    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
+    psCli::initApi();
     $opt = array('resource' => $objects);
     if (psCli::$apifields) {
         $opt['display']="[".join(",",array_keys(psCli::$apifields))."]";
@@ -50,22 +50,8 @@ try {
             $opt["filter[$f]"]="[$v]";
         }
     }
-    if (psCli::$debug) {
-        psOut::msg("Options passed to api:\n");
-        print_r($opt);
-    }
     psOut::progress("Getting data for $objects($object)...");
-    $Cache_Lite = new Cache_Lite(array(
-        'cacheDir' => '/tmp/',
-        'lifeTime' => 3600
-    ));
-    $id=md5(psCli::$shop_url.psCli::$shop_key.serialize($opt));
-    if ($data = $Cache_Lite->get($id)) {
-        $xml=New SimpleXMLElement($data);
-    } else {
-        $xml = $webService->get($opt);
-        $Cache_Lite->save($xml->asXML(), $id);
-    }
+    $xml=psCli::apiCmd("get",$opt);
     psOut::progress(sprintf("Got %d objects.                   ",count($xml->$objects->children())));
     $data = $xml->$objects->children();
     $row = 0;
