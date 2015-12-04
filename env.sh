@@ -63,4 +63,4 @@ _psobj()
 complete -F _psobj psdisable
 complete -F _psobj psenable
 complete -F _psobj psdelete
-
+complete -F _psobj psprops

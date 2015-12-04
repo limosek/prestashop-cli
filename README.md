@@ -20,6 +20,7 @@ Prestasoph-cli needs php5 cli and PHP pear package. It is theoreticaly possible 
 but it is not tested. On debian systems, use:
 ```
 $ sudo apt-get install php5-cli php-pear php5-curl git
+$ sudo pear install console_getopt cache_lite
 $ git clone https://github.com/limosek/prestashop-cli.git
 $ cd prestashop-cli
 $ . env.sh

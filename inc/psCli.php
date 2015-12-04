@@ -83,24 +83,30 @@ class psCli extends StdClass {
     );
     static $propfeatures = Array(
         "*" => Array(
-            "associations" => self::P_BAD
+            "associations" => self::P_RO
         ),
         "product" => Array(
-            "id" => self::P_REQUIRED,
             "manufacturer_name" => self::P_RO,
             "quantity" => self::P_RO
+        ),
+        "combination" => Array(
+            "id_product_option" => self::P_VIRTUAL
+        ),
+        "combinations" => Array(
+            "id_product_option" => self::P_VIRTUAL
         )
     );
 
     const E_URL = 2;
     const E_KEY = 3;
     const E_MISSOPT = 4;
-    const P_DEFAULT = -1;
-    const P_CFG = -2;
-    const P_FILTER = -3;
-    const P_RO = 1;
-    const P_REQUIRED = 2;
-    const P_BAD = 3;
+    const P_DEFAULT = 1;
+    const P_CFG = 2;
+    const P_FILTER = 4;
+    const P_RO = 8;
+    const P_REQUIRED = 16;
+    const P_BAD = 32;
+    const P_VIRTUAL = 64;
 
     static $cfgfile;
     static $shop_url;
@@ -278,16 +284,17 @@ class psCli extends StdClass {
         $name = $obj->getName();
         $dom = dom_import_simplexml($obj);
 
-        foreach (self::$propfeatures["*"] as $p => $v) {
-            if ($v == self::P_BAD) {
-                if (is_object($dom->getElementsByTagName($p)[0])) {
-                    $dom->removeChild($dom->getElementsByTagName($p)[0]);
-                }
-            }
-        }
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {
-                if ($v == self::P_BAD) {
+                if ($v && self::P_BAD) {
+                    if (is_object($dom->getElementsByTagName($p)[0])) {
+                        $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                    }
+                }
+            }
+        } else {
+            foreach (self::$propfeatures["*"] as $p => $v) {
+                if ($v && self::P_BAD) {
                     if (is_object($dom->getElementsByTagName($p)[0])) {
                         $dom->removeChild($dom->getElementsByTagName($p)[0]);
                     }

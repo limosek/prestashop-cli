@@ -21,16 +21,29 @@ try {
     $objectid = array_shift($args);
     $properties = array_flip($args);
     if (sizeof($properties)==0) {
-        $properties=Array("*" => 1);
+        psCli::$properties=Array("*" => 1);
     }
     $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
     $opt = array('resource' => $objects);
     psOut::progress("Getting data for $objects($object)...");
     psOut::begin($object);
     $opt['id'] = $objectid;
-    $xml = $webService->get($opt);
-    $rowobject = json_decode(json_encode($xml->children()->$object));
-    $rowdata=psGet::getValues($xml->children()->$object,$properties);
+    if (psCli::$debug) {
+        psOut::msg("Options passed to api:\n");
+        print_r($opt);
+    }
+    $Cache_Lite = new Cache_Lite(array(
+        'cacheDir' => '/tmp/',
+        'lifeTime' => 3600
+    ));
+    $id=md5(psCli::$shop_url.psCli::$shop_key.serialize($opt));
+    if ($data = $Cache_Lite->get($id)) {
+        $xml=New SimpleXMLElement($data);
+    } else {
+        $xml = $webService->get($opt);
+        $Cache_Lite->save($xml->asXML(), $id);
+    }
+    $rowdata=psGet::getValues($xml->children()->$object);
     psOut::write($rowdata);
     psOut::end($object);
 } catch (PrestaShopWebserviceException $e) {

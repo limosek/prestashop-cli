@@ -4,8 +4,26 @@ class psFilter extends StdClass {
     
     static $enabled=false;
     static $filter=false;
+    static $objects;
 
-    public function create($fstr) {
+    public function addapifilter($prop, $value) {
+        if (array_key_exists(self::$objects, psCli::$propfeatures) && array_key_exists($prop, psCli::$propfeatures[self::$objects]) && (psCli::$propfeatures[self::$objects][$prop] && psCli::P_VIRTUAL)) {
+            return;
+        } else {
+            psCli::$apifilter[$prop] = $value;
+        }
+    }
+
+    public function addapifield($prop) {
+        if (array_key_exists(self::$objects, psCli::$propfeatures) && array_key_exists($prop, psCli::$propfeatures[self::$objects]) && (psCli::$propfeatures[self::$objects][$prop] && psCli::P_VIRTUAL)) {
+            return;
+        } else {
+            psCli::$apifields[$prop] = 1;
+        }
+    }
+    
+    public function create($fstr,$objects) {
+        self::$objects=$objects;
         $filter = Array();
         if ($fstr) {
             if (!is_array($fstr)) {
@@ -17,27 +35,27 @@ class psFilter extends StdClass {
         foreach ($fstr as $f) {
             if (preg_match("/(.*)=(.*)/", $f)) {
                 preg_match("/(.*)=(.*)/", $f, $farr);
-                psCli::$apifields[$farr[1]]=1;
-                psCli::$apifilter[$farr[1]]=$farr[2];
+                self::addapifield($farr[1]);
+                self::addapifilter($farr[1],$farr[2]);
                 $filter["eq"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)>(.*)/", $f)) {
                 preg_match("/(.*)>(.*)/", $f, $farr);
-                psCli::$apifields[$farr[1]]=1;
+                self::addapifield($farr[1]);
                 $filter["gt"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)<(.*)/", $f)) {
                 preg_match("/(.*)<(.*)/", $f, $farr);
-                psCli::$apifields[$farr[1]]=1;
+                self::addapifield($farr[1]);
                 $filter["lt"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)~(.*)/", $f)) {
                 preg_match("/(.*)~(.*)/", $f, $farr);
-                psCli::$apifields[$farr[1]]=1;
+                self::addapifield($farr[1]);
                 $filter["re"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(.*)!(.*)/", $f)) {
                 preg_match("/(.*)!(.*)/", $f, $farr);
-                psCli::$apifields[$farr[1]]=1;
+                self::addapifield($farr[1]);
                 $filter["nre"][$farr[1]] = $farr[2];
             } else {
-                psCli::$apifields[$f]=1;
+                self::addapifield($f);
                 psCli::$properties[$f]=1;
                 $filter["re"][$f] = "(.*)";
             }
@@ -52,6 +70,7 @@ class psFilter extends StdClass {
             return(false);
 
         $fout = false;
+        $name=$obj->getName();
         foreach (self::$filter as $type => $f) {
             foreach ($f as $attr => $val) {
                 if (psGet::getLanguageObj($obj->$attr,$attr)) {
@@ -62,6 +81,11 @@ class psFilter extends StdClass {
                         $data=(string) $obj->$attr;
                         $isset=isset($obj->$attr);
                     } else {
+                        if (array_key_exists($name,psCli::$propfeatures)
+                                && array_key_exists($attr,psCli::$propfeatures[$name])
+                                && psCli::$propfeatures[$name][$attr] && psCli::P_VIRTUAL) {
+                            continue;
+                        }
                         psOut::error("Filter property $attr unknown! Available properties: ".join(",",psGet::getProperties($obj)));
                     }
                 }

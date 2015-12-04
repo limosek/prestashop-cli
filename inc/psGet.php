@@ -2,19 +2,22 @@
 
 class psGet extends psCli {
 
-    public function getValues($obj, $properties = false) {
-	$arr=json_decode(json_encode($obj));
+    public function filterProps($obj) {
+        $name = $obj->getName();
+        $dom = dom_import_simplexml($obj);
+
+        $obj=parent::filterProps($obj);
+        if ($obj->xpath("associations/product_option_values/product_option_value")) {            
+            $po=(string) $obj->xpath("associations/product_option_values/product_option_value")[0]->id;
+            $obj->addChild("id_product_option",$po);
+        }
+        return($obj);
+    }
+    
+    public function getValues($obj) {
+	$arr=json_decode(json_encode(self::filterProps($obj)));
         $row = Array();
-        if (!$properties) {
-            if (!self::$properties) {
-                $properties = self::getProperties($arr);
-            } else {
-                $properties = self::$properties;
-            }
-        }
-        if (array_key_exists("*", $properties)) {
-            $properties = array_flip(self::getProperties($arr));
-        }
+        $properties = array_flip(self::getProperties($arr));
         foreach ($properties as $p => $v) {
             if (!isset($arr->$p)) {
                 psOut::msg("List of availbalbe properties: ".join(",",self::getProperties($arr))."\n");

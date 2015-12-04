@@ -11,6 +11,12 @@ class psOut extends StdClass {
     const ESCAPECHARS = "\n\r\":|<>&;()[]*\$#!";
     
     public function write($data) {
+        foreach ($data as $k=>$v) {
+            if (array_key_exists("*",psCli::$properties)) continue;
+            if (!array_key_exists($k,psCli::$properties)) {
+                unset($data[$k]);
+            }
+        }
         switch (self::$oformat) {
             case "cli": self::cli($data);
                 break;

@@ -35,13 +35,10 @@ try {
         }
     }
     if (sizeof($filter)>0) {
-        psFilter::create($filter);
+        psFilter::create($filter,$objects);
     }
     if (psCli::$debug) {
         psOut::msg("Filter: ".print_r($filter,true)."\n");
-    }
-    if (!psFilter::$enabled && count(psCli::$properties)>1) {
-        psOut::error("You cannot get any properties without filter.");
     }
     $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
     $opt = array('resource' => $objects);
@@ -58,7 +55,17 @@ try {
         print_r($opt);
     }
     psOut::progress("Getting data for $objects($object)...");
-    $xml = $webService->get($opt);
+    $Cache_Lite = new Cache_Lite(array(
+        'cacheDir' => '/tmp/',
+        'lifeTime' => 3600
+    ));
+    $id=md5(psCli::$shop_url.psCli::$shop_key.serialize($opt));
+    if ($data = $Cache_Lite->get($id)) {
+        $xml=New SimpleXMLElement($data);
+    } else {
+        $xml = $webService->get($opt);
+        $Cache_Lite->save($xml->asXML(), $id);
+    }
     psOut::progress(sprintf("Got %d objects.                   ",count($xml->$objects->children())));
     $data = $xml->$objects->children();
     $row = 0;
@@ -70,7 +77,7 @@ try {
         if (sizeof($ids)>0 && !array_key_exists($id,$ids)) {
             continue;
         }
-        $rowdata = psGet::getValues($r, psCli::$properties);
+        $rowdata = psGet::getValues($r);
         if (psFilter::$enabled) {
             psOut::progress(false, $row, $cnt);
             if (psFilter::$enabled && psFilter::isFiltered($r)) {
