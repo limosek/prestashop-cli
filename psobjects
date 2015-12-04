@@ -1,0 +1,10 @@
+#!/usr/bin/env php
+<?php
+require(__DIR__ . "/inc/common.php");
+
+psGet::init($argv);
+foreach (psCli::$resources as $resource => $desc) {
+    echo sprintf('%s %s %s'."\n", $resource, psCli::subobject($resource), $desc);
+}
+
+

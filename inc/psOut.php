@@ -14,6 +14,8 @@ class psOut extends StdClass {
         switch (self::$oformat) {
             case "cli": self::cli($data);
                 break;
+            case "cli2": self::cli2($data);
+                break;
             case "ml": self::multiline($data);
                 break;
             case "csv": self::csv($data);
@@ -97,6 +99,13 @@ class psOut extends StdClass {
         }
     }
 
+    public function cli2($data) {
+            foreach ($data as $column) {
+                echo '"'.self::slashes(self::expvar($column)).'"'." ";
+            }
+            echo "\n";
+    }
+    
     public function cli($data) {
             foreach ($data as $column) {
                 echo self::slashes(self::expvar($column))." ";
@@ -145,6 +154,7 @@ class psOut extends StdClass {
     public function help() {
         self::msg("Output formats:\n");
         self::msg("cli      - Output suitable for next CLI parsing\n");
+        self::msg("cli2     - Output suitable for next CLI parsing (fields enclosed in quotes)\n");
         self::msg("ml       - Multiline output suitable for next CLI parsing\n");
         self::msg("csv      - CSV output\n");
         self::msg("xml      - XML output\n");

@@ -18,10 +18,14 @@ try {
     }
     $objects=psCli::upobject($object);
     $objectid = array_shift($args);
-    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, false);
+    $webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
     $opt = array('resource' => $objects);
     $opt['id'] = $objectid;
-    $xml = $webService->delete($opt);
+    if (psCli::$dry) {
+        psOut::msg("Dry mode: No modifications but should delete object based on this options:\n".print_r($opt,true));
+    } else {
+        $xml = $webService->delete($opt);
+    }
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors
     $trace = $e->getTrace();

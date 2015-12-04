@@ -280,13 +280,17 @@ class psCli extends StdClass {
 
         foreach (self::$propfeatures["*"] as $p => $v) {
             if ($v == self::P_BAD) {
-                $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                if (is_object($dom->getElementsByTagName($p)[0])) {
+                    $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                }
             }
         }
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {
                 if ($v == self::P_BAD) {
-                    $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                    if (is_object($dom->getElementsByTagName($p)[0])) {
+                        $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                    }
                 }
             }
         }

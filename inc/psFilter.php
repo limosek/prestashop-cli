@@ -56,6 +56,7 @@ class psFilter extends StdClass {
             foreach ($f as $attr => $val) {
                 if (psGet::getLanguageObj($obj->$attr,$attr)) {
                     $isset=psGet::getLanguageObj($obj->$attr,$attr);
+                    $data=(string) $isset[0];
                 } else {
                     if (isset($obj->$attr)) {
                         $data=(string) $obj->$attr;

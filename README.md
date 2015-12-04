@@ -7,6 +7,12 @@ If you know your shell and it's power and you need to bulk edit your Prestashop 
 Please take care when modifying your data! Always backup your Prestashop before use! It is good practice to create web api key 
 with readonly access (or minimal access) to test everything.
 
+## Contributions are welcome ##
+If you found this project usefull, you can help to improve it (yes, it is opensource :) ). Best way is to share your scripts 
+into contrib directory of this project. So if you made some script which will do some mass operation with your Prestashop, 
+please contact me and I will share it here.
+Of course you can send some donations to bitcoin address 1EaKkkLKqC6f9DiMPUfMvbRXWJZBebe1Yx :) . 
+
 # Howto
 
 ## Installation ##
@@ -16,8 +22,12 @@ but it is not tested. On debian systems, use:
 $ sudo apt-get install php5-cli php-pear php5-curl git
 $ git clone https://github.com/limosek/prestashop-cli.git
 $ cd prestashop-cli
+$ . env.sh
 $ {./pslist|./psget|./psprops|./psupdate|./psdel|./psenable|./psdisable} [options]
 ```
+If you use env.sh, autocompletion is working automaticaly so you can use TAB. 
+If you run command without parameters, it will show help options.
+You can even use --help to get more help.
 
 ## Configuration ##
 First, enable API access in your Prestashop and create API token.
@@ -37,7 +47,7 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ; Parameters for getting objects (to get their data)
 
 [props]
-; Parameters for getting objects (to get their data)
+; Parameters for getting properties of objects
 
 [update]
 ; Parameters for updating objects
@@ -47,6 +57,10 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 [addresses]
 ; Parameters for listing specific kind of objects
+; Uncomment next lines and pslist addresses will always return firstname,lastname and city
+;properties[]=firstname
+;properties[]=lasttname
+;properties[]=city
 
 [address]
 ; Parameters for geting specific kind of object
@@ -134,8 +148,89 @@ $ ./pslist products
 
 ### List all properties for product ###
 ```
-$ ./psprops products
-id id_manufacturer id_supplier id_category_default new cache_default_attribute id_default_image id_default_combination id_tax_rules_group position_in_category manufacturer_name quantity type id_shop_default reference supplier_reference location width height depth weight quantity_discount ean13 upc cache_is_pack cache_has_attachments is_virtual on_sale online_only ecotax minimal_quantity price wholesale_price unity unit_price_ratio additional_shipping_cost customizable text_fields uploadable_files active redirect_type id_product_redirected available_for_order available_date condition show_price indexed visibility advanced_stock_management date_add date_upd pack_stock_type meta_description meta_keywords meta_title link_rewrite name description description_short available_now available_later associations 
+$ ./psprops product
+id
+id_manufacturer
+id_supplier
+id_category_default
+new
+cache_default_attribute
+id_default_image
+id_default_combination
+id_tax_rules_group
+position_in_category
+manufacturer_name
+quantity
+type
+id_shop_default
+reference
+supplier_reference
+location
+width
+height
+depth
+weight
+quantity_discount
+ean13
+upc
+cache_is_pack
+cache_has_attachments
+is_virtual
+on_sale
+online_only
+ecotax
+minimal_quantity
+price
+wholesale_price
+unity
+unit_price_ratio
+additional_shipping_cost
+customizable
+text_fields
+uploadable_files
+active
+redirect_type
+id_product_redirected
+available_for_order
+available_date
+condition
+show_price
+indexed
+visibility
+advanced_stock_management
+date_add
+date_upd
+pack_stock_type
+meta_description
+meta_keywords
+meta_title
+link_rewrite
+name
+description
+description_short
+available_now
+available_later
+```
+
+### Languages ###
+By default, all operations are made with default languageid 1.
+If you want to operate on other language, use --language=id
+To see available languages, run
+```
+$ ./pslist languages name iso_code active active=1
+```
+
+### List product with filter and more fields ###
+You can use one or more filters. There is logical and between filter outputs. 
+Filter operators are =,<,>,~,! (equal, less than, bigger than, regexp, not regexp)
+Do not forget to use '' due to shell special characters!
+By default only ids are returned. To return more properties, use property name without filter.
+```
+#                   Only_new   Include_price_in_output   Include_name_in_output    Filter: price has to be bigger than 10
+$ ./pslist products condition=new      price                     name                      'price>10'
+$ ./pslist products id_manucacturer=1
+$ ./pslist products 'price>10' id_manucacturer=1 # (logical and)
+$ (./pslist products 'price>10'; ./pslist products id_manucacturer=1) # (logical or)
 ```
 
 ### Get product values ###
@@ -144,30 +239,26 @@ $ ./psget --output-format=csv product 8
 "8";"2";"0";"12";"";"80";"95";"80";"1";"1";"Odeli.cz";"0";"simple";"1";"kmast";"";"";"7.000000";"4.500000";"4.500000";"0.060000";"0";"0";"";"0";"0";"0";"0";"0";"0.000000";"1";"0.000000";"0.000000";"";"0.000000";"0.00";"0";"0";"0";"1";"404";"0";"1";"2015-04-15";"new";"1";"1";"both";"0";"2014-05-18 17\:08\:54";"2015-10-07 13\:24\:28";"3";"";"";"";"kostivalova-mast";"Kostivalová mast 100ml";"\<h3\>Informace\</h3\>\n\<p\>Příznivé léčivé vlastnosti kostivalu jsou známé už dlouho. Ve formě masti se používá k tlumení bolesti a urychlení hojení různých poranění – od těžkých pohmožděnin přes bolestivá vymknutí kotníků až po lehčí oděrky. Odborníky ovšem stále překvapuje, jak moc účinný kostival je – masti dávají stále častěji přednost před nejmodernějšími léky.\</p\>\n\<p\>Naražené místo se potře kostivalovou mastí, překryje mikrotenem a zafixuje obinadlem. Během krátké doby zmizí bolest a hematom se mnohem rychleji vstřebá.\</p\>\n\<p\>\</p\>\n\<h3\>Složení\</h3\>\n\<ul\>\<li\>\<span style=\"font-size\:11px\;\"\>Domácí vepřové sádlo\</span\>\</li\>\n\<li\>\<span style=\"font-size\:11px\;\"\>Kostival kořen\</span\>\</li\>\n\<li\>\<span style=\"font-size\:11px\;\"\>Šalvěj\</span\>\</li\>\n\<li\>\<span style=\"font-size\:11px\;\"\>Tymián\</span\>\</li\>\n\</ul\>";"\<p\>Kostivalová mast s blahodárným účinkem na kosti a klouby.\</p\>\n\<p\>\</p\>";"";"";"";
 ```
 
-### List products with filter ###
-You can use one or more filters. There is logical and between filter outputs. 
-Filter operators are =,<,>,~,! (equal, less than, bigger than, regexp, not regexp)
-Do not forget to use '' due to shell special characters!
-```
-$ ./pslist products id_manucacturer=1
-$ ./pslist products 'price>10' id_manucacturer=1 # (logical and)
-$ (./pslist products 'price>10'; ./pslist products id_manucacturer=1) # (logical or)
-```
-
-### Update values ###
+### Update values for object ###
+We always update only single object. If you want to update more objects, use shell scripting.
 ```
 $ ./psupdate product 8 quantity=10 
 $ ./psupdate product 8 quantity=10 price=20 # (set both values)
 ```
 
-### Enable or disable objects ###
+### Enable or disable object ###
 ```
 $ ./psenable product 8
 $ ./psdisable product 8
 ```
 
+### Delete object ###
+```
+$ ./psenable product 8
+$ ./psdisable product 8
+
 ## Output modes ##
-Available output modes: cli, csv, env, php, ml
+Available output modes: cli, cli2, csv, env, php, ml
 ```
 $ ./get product --output-mode=csv 8
 $ ./get product --output-format=xml 8
