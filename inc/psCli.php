@@ -317,18 +317,16 @@ class psCli extends StdClass {
 
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {
-                if (isset($obj->$p) && $v && self::P_BAD) {
-                    if (is_object($dom->getElementsByTagName($p)[0])) {
-			psOut::debug("Filtering $p");
+                if (isset($obj->$p) && ($v & self::P_BAD)) {
+                    if (is_object($dom->getElementsByTagName($p))) {
                         $dom->removeChild($dom->getElementsByTagName($p)[0]);
                     }
                 }
             }
         } else {
             foreach (self::$propfeatures["*"] as $p => $v) {
-                if (isset($obj->$p) && $v && self::P_BAD) {
-                    if (is_object($dom->getElementsByTagName($p))[0]) {
-			psOut::debug("Filtering $p");
+                if (isset($obj->$p) && ($v & self::P_BAD)) {
+                    if (is_object($dom->getElementsByTagName($p))) {
                         $dom->removeChild($dom->getElementsByTagName($p)[0]);
                     }
                 }

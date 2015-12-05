@@ -22,6 +22,8 @@ try {
     $properties = array_flip($args);
     if (sizeof($properties)==0) {
         psCli::$properties=Array("*" => 1);
+    } else {
+	psCli::$properties=$properties;
     }
     psCli::initApi();
     $opt = array('resource' => $objects);

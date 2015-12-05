@@ -1,8 +1,27 @@
 #!/bin/sh
 
-pslist combinations id id_product id_product_option price| while read id id_product id_product_option price; do
-    product=$(psget product $id_product name price)
-    options=$(psget product_option_value $id_product_option name)
-    echo $product $options
+getproduct() 
+{
+	psget -Fcli2 product "$1" name
+}
+
+getpo() 
+{
+	psget -Fcli2 product_option "$1" name
+}
+
+getpov() 
+{
+	psget product_option_value $* 
+}
+
+combinations=$(pslist combinations)
+for c in $combinations; do
+  	eval $(psget -Fenv combination $c)
+	product=$(getproduct $id_product)
+    	option=$(getpov $id_product_option)
+    	optionvalue=$(getpov $id_product_option name)
+	optionname=$(getpo $(getpov $id_product_option id_attribute_group))
+    	echo $product "$optionname:$optionvalue"
 done
 
