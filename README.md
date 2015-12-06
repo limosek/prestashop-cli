@@ -23,7 +23,7 @@ $ sudo apt-get install php5-cli php5-curl git
 $ git clone https://github.com/limosek/prestashop-cli.git
 $ cd prestashop-cli
 $ . env.sh
-$ {./pslist|./psget|./psprops|./psupdate|./psdel|./psenable|./psdisable} [options]
+$ {pslist|psget|psprops|psupdate|psdel|psenable|psdisable} [options]
 ```
 If you use env.sh, autocompletion is working automaticaly so you can use TAB. 
 If you run command without parameters, it will show help options.
@@ -226,7 +226,7 @@ $ ./pslist languages name iso_code active active=1
 
 ### List product with filter and more fields ###
 You can use one or more filters. There is logical and between filter outputs. 
-Filter operators are =,<,>,~,! (equal, less than, bigger than, regexp, not regexp)
+Filter operators are =,<,>,~,!=,!~ (equal, less than, bigger than, regexp, not equal, not regexp)
 Do not forget to use '' due to shell special characters!
 By default only ids are returned. To return more properties, use property name without filter.
 ```
