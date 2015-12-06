@@ -98,7 +98,9 @@ class psUpdate extends stdClass {
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (psCli::$propfeatures[$name] as $p=>$v) {
                 if ($v==psCli::P_BAD || $v==psCli::P_RO) {
-                    $dom->removeChild($dom->getElementsByTagName($p)[0]);
+	 	    if ($dom->getElementsByTagName($p)->item(0)) {
+                    	$dom->removeChild($dom->getElementsByTagName($p)->item(0));
+		    }
                 }
             }
         }

@@ -28,6 +28,8 @@ class psOut extends StdClass {
                 break;
             case "env": self::env($data);
                 break;
+	    case "envid": self::envid($data);
+                break;
             case "xml": self::xml($data);
                 break;
             case "php": self::php($data);
@@ -107,14 +109,16 @@ class psOut extends StdClass {
 
     public function cli2($data) {
             foreach ($data as $column) {
-                echo '"'.self::slashes(self::expvar($column)).'"'." ";
+                echo '"'.self::slashes(self::expvar($column)).'"';
+		if (!($column===end($data))) echo " ";
             }
             echo "\n";
     }
     
     public function cli($data) {
             foreach ($data as $column) {
-                echo self::slashes(self::expvar($column))." ";
+                echo self::slashes(self::expvar($column));
+		if (!($column===end($data))) echo " ";
             }
             echo "\n";
     }
@@ -136,6 +140,13 @@ class psOut extends StdClass {
     public function env($data) {
         foreach ($data as $column => $value) {
             echo sprintf('%s="%s"; ', $column, self::slashes(self::expvar($value)));
+        }
+        echo "\n";
+    }
+
+    public function envid($data) {
+        foreach ($data as $column => $value) {
+            echo sprintf('%s_%s="%s"; ', $column, $data["id"], self::slashes(self::expvar($value)));
         }
         echo "\n";
     }
@@ -165,6 +176,7 @@ class psOut extends StdClass {
         self::msg("csv      - CSV output\n");
         self::msg("xml      - XML output\n");
         self::msg("env      - Output suitable for environment setting\n");
+	self::msg("envid    - Output suitable for environment setting (variable suffix with id)\n");
     }
 
 }

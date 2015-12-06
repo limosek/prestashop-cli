@@ -288,6 +288,9 @@ class psCli extends StdClass {
 	    'lifeTime' => self::$cachelife
 	));
 	$id=md5(psCli::$shop_url.psCli::$shop_key.$cmd.serialize($opt));
+	  if (self::$debug) {
+		psOut::msg("Arguments passed to web api: ".print_r($opt,true));
+	  }
 	if (self::$cache && $data = $Cache_Lite->get($id)) {
 	  $xml=New SimpleXMLElement($data);
 	  psOut::progress("Done (from cache).");
@@ -296,6 +299,9 @@ class psCli extends StdClass {
 	  if (self::$cache ) $Cache_Lite->save($xml->asXML(), $id);
 	  psOut::progress("Done.");
 	}
+	if (self::$debug) {
+		psOut::msg("Returned XML:\n".$xml->asXML());
+	  }
 	return($xml);
     }
 
@@ -313,7 +319,7 @@ class psCli extends StdClass {
 
     public function filterProps($obj) {
         $name = $obj->getName();
-        $dom = dom_import_simplexml($obj);
+        $dom = @dom_import_simplexml($obj);
 
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {

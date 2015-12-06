@@ -33,12 +33,7 @@ class psFilter extends StdClass {
             return(false);
         }
         foreach ($fstr as $f) {
-            if (preg_match("/(.*)=(.*)/", $f)) {
-                preg_match("/(.*)=(.*)/", $f, $farr);
-                self::addapifield($farr[1]);
-                self::addapifilter($farr[1],$farr[2]);
-                $filter["eq"][$farr[1]] = $farr[2];
-            } elseif (preg_match("/(.*)>(.*)/", $f)) {
+            if (preg_match("/(.*)>(.*)/", $f)) {
                 preg_match("/(.*)>(.*)/", $f, $farr);
                 self::addapifield($farr[1]);
                 $filter["gt"][$farr[1]] = $farr[2];
@@ -46,14 +41,23 @@ class psFilter extends StdClass {
                 preg_match("/(.*)<(.*)/", $f, $farr);
                 self::addapifield($farr[1]);
                 $filter["lt"][$farr[1]] = $farr[2];
-            } elseif (preg_match("/(.*)~(.*)/", $f)) {
+            } elseif (preg_match("/(.*)!~(.*)/", $f)) {
+                preg_match("/(.*)!~(.*)/", $f, $farr);
+                self::addapifield($farr[1]);
+                $filter["nre"][$farr[1]] = $farr[2];
+            } elseif (preg_match("/(.*)!=(.*)/", $f)) {
+                preg_match("/(.*)!=(.*)/", $f, $farr);
+                self::addapifield($farr[1]);
+                $filter["neq"][$farr[1]] = $farr[2];
+	    } elseif (preg_match("/(.*)~(.*)/", $f)) {
                 preg_match("/(.*)~(.*)/", $f, $farr);
                 self::addapifield($farr[1]);
                 $filter["re"][$farr[1]] = $farr[2];
-            } elseif (preg_match("/(.*)!(.*)/", $f)) {
-                preg_match("/(.*)!(.*)/", $f, $farr);
+            } elseif (preg_match("/(.*)=(.*)/", $f)) {
+                preg_match("/(.*)=(.*)/", $f, $farr);
                 self::addapifield($farr[1]);
-                $filter["nre"][$farr[1]] = $farr[2];
+                self::addapifilter($farr[1],$farr[2]);
+                $filter["eq"][$farr[1]] = $farr[2];
             } else {
                 self::addapifield($f);
                 psCli::$properties[$f]=1;
@@ -118,7 +122,12 @@ class psFilter extends StdClass {
                         case "nre":
                             if (preg_match("/$val/", $data)) {
                                 $fout = true;
-                                $fwhy = "$attr~$val";
+                                $fwhy = "$attr~=$val";
+                            }
+			case "neq":
+                            if ($data == $val) {
+                                $fout = true;
+                                $fwhy = "$attr!=$val";
                             }
                             break;
                     }

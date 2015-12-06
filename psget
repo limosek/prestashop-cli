@@ -32,7 +32,15 @@ try {
     $xml=psCli::apiCmd("get",$opt);
     psOut::begin($object);
     $rowdata=psGet::getValues($xml->children()->$object);
-    psOut::write($rowdata);
+    if (array_key_exists("*",psCli::$properties)) {
+	$rowdata2=$rowdata;
+    } else {
+    	$rowdata2=Array();
+    	foreach (psCli::$properties as $p=>$v) {
+		$rowdata2[$p]=$rowdata[$p];
+    	}
+    }
+    psOut::write($rowdata2);
     psOut::end($object);
 } catch (PrestaShopWebserviceException $e) {
     // Here we are dealing with errors

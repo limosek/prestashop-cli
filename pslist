@@ -17,7 +17,8 @@ try {
                 . "property=value to match exactly\n"
                 . "property>value to match objects with property bigger than value\n"
                 . "property<value to match objects with property lower than value\n"
-                . "property~value to match objects with property matched by regexp\n"
+                . "property!~value to match objects with property matched by regexp\n"
+		. "property!=value to match object not equal to value\n"
                 . "id to match only objects with this ids\n"
                 . "property to output given property.\n"
                 . "Use --help to get more informations\n\n"
@@ -71,7 +72,11 @@ try {
                     psOut::msg("Filtering $object $id due to filter.\n");
                 continue;
             }
-            psOut::write($rowdata);
+	    $rowdata2=Array();
+	    foreach (psCli::$properties as $p=>$v) {
+		$rowdata2[$p]=$rowdata[$p];
+	    }
+            psOut::write($rowdata2);
         } else {
             psOut::write($rowdata);
         }
