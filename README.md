@@ -260,6 +260,7 @@ $ ./psdisable product 8
 ```
 $ ./psenable product 8
 $ ./psdisable product 8
+```
 
 ## Output modes ##
 Available output modes: cli, cli2, csv, env, php, ml
@@ -268,6 +269,7 @@ $ ./get product --output-mode=csv 8
 $ ./get product --output-format=xml 8
 $ ./get product --output-format=php 8
 $ ./get product --output-format=env 8
+$ ./get product --output-format=ml 8
 ```
 
 # Licence
