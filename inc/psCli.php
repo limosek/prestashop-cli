@@ -346,14 +346,29 @@ class psCli extends StdClass {
             case "addresses":
                 return("address");
                 break;
+	    case "categories":
+                return("category");
+                break;    
+	    case "countries":
+                return("country");
+                break;
+            case "currencies":
+                return("currency");
+                break;    
+	    case "deliveries":
+                $ret = "delivery";
+                break;
+	    case "order_histories":
+                $ret = "order_history";
+                break;
+	    case "supply_order_histories":
+                $ret = "supply_order_history";
+                break;
+	    case "supply_order_receipt_histories":
+                $ret = "supply_order_receipt_history";
+                break;
             case "taxes":
                 return("tax");
-                break;
-            case "deliveries":
-                return("delivery");
-                break;
-            case "categories":
-                return("category");
                 break;
             default:
                 return(substr($objects, 0, -1));
@@ -366,14 +381,29 @@ class psCli extends StdClass {
             case "address":
                 $ret = "addresses";
                 break;
-            case "tax":
-                $ret = "taxes";
+	    case "categories":
+                $ret = "category";
                 break;
-            case "delivery":
+	    case "country":
+                $ret = "countries";
+                break;
+            case "currency":
+                $ret = "currencies";
+                break;
+	    case "delivery":
                 $ret = "deliveries";
                 break;
-            case "category":
-                $ret = "categories";
+	    case "order_history":
+                $ret = "order_histories";
+                break;
+	    case "supply_order_history":
+                $ret = "supply_order_histories";
+                break;
+	    case "supply_order_receipt_history":
+                $ret = "supply_order_receipt_histories";
+                break;
+            case "tax":
+                $ret = "taxes";
                 break;
             default:
                 $ret = $object . "s";
