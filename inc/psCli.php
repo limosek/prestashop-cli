@@ -381,8 +381,8 @@ class psCli extends StdClass {
             case "address":
                 $ret = "addresses";
                 break;
-	    case "categories":
-                $ret = "category";
+	    case "category":
+                $ret = "categories";
                 break;
 	    case "country":
                 $ret = "countries";
