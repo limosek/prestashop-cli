@@ -17,15 +17,15 @@ fi
 
 groups=$(pslist groups "name~$groupregexp")
 categories=$(pslist categories "name~$categoryregexp")
-echo "Groups: $groups" >&2
-echo "Categories: $categories" >&2
+#echo "--- Groups: $groups"
+#echo "--- Categories: $categories"
 
-echo "BEGIN"
+echo "BEGIN;"
 for c in $categories; do
   for g in $groups; do
 	echo "DELETE FROM ps_category_group WHERE id_category=$c AND id_group=$g;"
-	echo "INSERT IGNORE INTO ps_category_group (id_category,id_group) VALUES ($c,$g);"
+	echo "INSERT INTO ps_category_group (id_category,id_group) VALUES ($c,$g);"
   done
 done
-echo "COMMIT"
+echo "COMMIT;"
 
