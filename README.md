@@ -44,6 +44,11 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ;cache-dir=/tmp/
 ;cache-lifetime=3600
 
+[shop-shopname]
+; Shop specific parameters. Use --shop=shopname to use this section or use environment variable PS_SHOP
+shop-url=http://yourshop.domain
+shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 [list]
 ; Parameters for listing objects (to get their ids)
 

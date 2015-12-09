@@ -4,7 +4,7 @@ require(__DIR__ . "/inc/common.php");
 
 psGet::init($argv);
 foreach (psCli::$resources as $resource => $desc) {
-    echo sprintf('%s %s %s'."\n", $resource, psCli::subobject($resource), $desc);
+    echo sprintf('%-30s %-30s %s'."\n", $resource, psCli::subobject($resource), $desc);
 }
 
 

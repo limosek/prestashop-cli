@@ -8,6 +8,7 @@ class psCli extends StdClass {
         "config-file=",
         "shop-url=",
         "shop-key=",
+        "shop=",
         "language=",
         "long",
         "debug",
@@ -150,7 +151,7 @@ class psCli extends StdClass {
             $longopts = self::$longopts;
         }
         $o = New Console_Getopt;
-        $opts = $o->getopt($argv, $shortopts, $longopts);
+        $opts = @$o->getopt($argv, $shortopts, $longopts);
         if (PEAR::isError($opts)) {
             self::help();
             psOut::error('Error: ' . $opts->getMessage());
@@ -213,6 +214,11 @@ class psCli extends StdClass {
     }
 
     public function readcfg($contexts) {
+        if (self::getarg("--shop",self::$goptions)) {
+            $contexts=Array_merge($contexts,Array("shop-".self::getarg("shop",self::$goptions)));
+        } elseif (getenv("PS_SHOP")) {
+            $contexts=Array_merge($contexts,Array("shop-".getenv("PS_SHOP")));
+        }
         if (file_exists(self::$cfgfile)) {
             $allfoptions = parse_ini_file(self::$cfgfile, true);
             $foptions = Array();
@@ -221,6 +227,8 @@ class psCli extends StdClass {
             foreach ($contexts as $context) {
                 if (array_key_exists($context, $allfoptions)) {
                     $foptions = array_merge($foptions, $allfoptions[$context]);
+                } elseif (preg_match("/shop-/",$context)) {
+                    psOut::error("Config section for shop ($context) does not exists!");
                 }
             }
         } else {
@@ -236,7 +244,6 @@ class psCli extends StdClass {
                 $options[$opt] = self::$goptions[$opt];
             }
         }
-
         self::$shop_url = self::getarg("shop-url|u", $options);
         self::$shop_key = self::getarg("shop-key|k", $options);
         if (!self::$shop_url) {
@@ -344,16 +351,16 @@ class psCli extends StdClass {
     public function subobject($objects) {
         switch ($objects) {
             case "addresses":
-                return("address");
+                $ret="address";
                 break;
 	    case "categories":
-                return("category");
+                $ret="category";
                 break;    
 	    case "countries":
-                return("country");
+                $ret="country";
                 break;
             case "currencies":
-                return("currency");
+                $ret="currency";
                 break;    
 	    case "deliveries":
                 $ret = "delivery";
@@ -368,11 +375,16 @@ class psCli extends StdClass {
                 $ret = "supply_order_receipt_history";
                 break;
             case "taxes":
-                return("tax");
+                $ret="tax";
                 break;
             default:
-                return(substr($objects, 0, -1));
+                $ret=substr($objects, 0, -1);
                 break;
+        }
+        if (!array_key_exists($objects, self::$resources)) {
+            psOut::error("Bad resource $object! See psobjects to help.");
+        } else {
+            return($ret);
         }
     }
 
@@ -410,7 +422,7 @@ class psCli extends StdClass {
                 break;
         }
         if (!array_key_exists($ret, self::$resources)) {
-            psOut::error("Bad resource $object! See help.");
+            psOut::error("Bad resource $object! See psobjects to help.");
         } else {
             return($ret);
         }
@@ -435,6 +447,9 @@ class psCli extends StdClass {
     public function help() {
         psOut::msg("\nCommon options:\n");
         psOut::msg("--help                  This help\n");
+        psOut::msg("--shop-url url          Base url of shop\n");
+        psOut::msg("--shop-key key          Shop API key\n");
+        psOut::msg("--shop name             Shop name (configuration in ini file)\n");
         psOut::msg("--buffered              Buffered output\n");
         psOut::msg("--progress              See progress messages\n");
         psOut::msg("--debug                 Enable debug output\n");
