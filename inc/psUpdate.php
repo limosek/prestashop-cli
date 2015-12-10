@@ -4,6 +4,16 @@ class psUpdate extends stdClass {
 
     static $update;
 
+    public function decode($var) {        
+        if (psOut::$base64) {
+            $var=base64_decode($var);
+        }
+	if (psOut::$htmlescape) {
+            $var=htmlspecialchars_decode($var);
+        }
+	return($var);
+    }
+
     public function create($fstr) {
         $update = Array();
         if ($fstr) {
@@ -22,16 +32,16 @@ class psUpdate extends stdClass {
                 $update["multiply"][$farr[1]] = $farr[2];
             } elseif (preg_match("/(\w*)\.=(.*)/", $f)) {
                 preg_match("/(\w*)\.=(.*)/", $f, $farr);
-                $update["rconcat"][$farr[1]] = $farr[2];
+                $update["rconcat"][$farr[1]] = self::decode($farr[2]);
             } elseif (preg_match("/(\w*)=\.(.*)/", $f)) {
                 preg_match("/(\w*)=\.(.*)/", $f, $farr);
-                $update["lconcat"][$farr[1]] = $farr[2];
+                $update["lconcat"][$farr[1]] = self::decode($farr[2]);
             } elseif (preg_match("/(\w*)\~=(.*)/", $f)) {
                 preg_match("/(\w*)\~=(.*)/", $f, $farr);
-                $update["regexp"][$farr[1]] = $farr[2];
+                $update["regexp"][$farr[1]] = self::decode($farr[2]);
             } elseif (preg_match("/(\w*)=(.*)/", $f)) {
                 preg_match("/(\w*)=(.*)/", $f, $farr);
-                $update["set"][$farr[1]] = $farr[2];
+                $update["set"][$farr[1]] = self::decode($farr[2]);
             } else {
                 psOut::error("Bad update syntax!");
             }
@@ -112,7 +122,6 @@ class psUpdate extends stdClass {
         if (isset($obj->language)) {
             $i=0;
             foreach ($obj->language as $o) {
-                echo (int) $o["id"]."\n";
                 if ((int) $o["id"] == psCli::$lang) {
                     $obj->language[$i]=$value;
                     $changed=true;

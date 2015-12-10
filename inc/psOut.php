@@ -5,6 +5,7 @@ class psOut extends StdClass {
     static $log = false;
     static $oformat = "cli";
     static $base64 = false;
+    static $htmlescape = false;
     static $buffered = false;
     static $context = false;
     static $category = "row";
@@ -91,19 +92,21 @@ class psOut extends StdClass {
         return(addcslashes($str,self::ESCAPECHARS));
     }
     
-    public function ifbase64($var) {
-        if (!self::$base64) {
-            return($var);
-        } else {
-            return(base64_encode($var));
+    public function encode($var) {
+        if (self::$htmlescape) {
+            $var=htmlspecialchars($var);
         }
+        if (self::$base64) {
+            $var=base64_encode($var);
+        }
+	return($var);
     }
     
     public function expvar($var) {
         if (is_array($var) || is_object($var)) {
-            return(self::ifbase64(print_r($var,true)));
+            return(self::encode(print_r($var,true)));
         } else {
-            return(self::ifbase64($var));
+            return(self::encode($var));
         }
     }
 

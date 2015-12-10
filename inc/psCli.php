@@ -20,6 +20,7 @@ class psCli extends StdClass {
         "output-format=",
         "properties=",
         "base64",
+	"htmlescape",
         "buffered",
         "dry"
     );
@@ -263,6 +264,7 @@ class psCli extends StdClass {
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
+	psOut::$htmlescape = self::isarg("htmlescape", $options);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
         self::$cache = self::isarg("cache", $options, false);
         self::$cachedir = self::getarg("cache-dir", $options, "/tmp/");
@@ -455,6 +457,7 @@ class psCli extends StdClass {
         psOut::msg("--debug                 Enable debug output\n");
         psOut::msg("--output-format=x       Set output format\n");
         psOut::msg("--base64                Use base64 in output\n");
+	psOut::msg("--htmlescape            Escape html output\n");
         psOut::msg("--cache                 Enable caching (default disable)\n");
         psOut::msg("--cache-dir             Cache diectory (default /tmp/)\n");
         psOut::msg("--cache-lifetime        Cache time in seconds (default 3600s)\n");

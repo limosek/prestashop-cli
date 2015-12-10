@@ -13,7 +13,7 @@ fi
 echo $PATH | grep -vq $PS_CLI && export PATH=$PS_CLI:$PATH
 [ -z "$BASH" ] && return # Autocompletion works only with bash
 
-PSOPTS="--help --debug --dry --output-format --progress --buffered --language --base64"
+PSOPTS="--help --debug --dry --output-format --progress --buffered --language --base64 --htmlescape --shop --shop-url --shop-key"
 
 __objects()
 {
@@ -22,7 +22,7 @@ __objects()
 
 __object()
 {
-   psobjects | cut -d ' ' -f 2
+   psobjects | tr -s ' ' | cut -d ' ' -f 2
 }
 
 __objects2object()
