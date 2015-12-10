@@ -1,30 +1,43 @@
-echo $PATH | grep -vq $PWD && export PATH=$PWD:$PATH
+
+if [ "$1" = "install" ]; then
+  PS_CLI=$(dirname $0)
+  echo "##Prestashop cli utils"
+  echo "export PS_CLI=${PS_CLI}"
+  echo ". ${PS_CLI}/env.sh"
+  echo "##"
+  exit
+else
+  [ -z "${PS_CLI}" ] && export PS_CLI=$PWD
+fi
+
+echo $PATH | grep -vq $PS_CLI && export PATH=$PS_CLI:$PATH
+[ -z "$BASH" ] && return # Autocompletion works only with bash
 
 PSOPTS="--help --debug --dry --output-format --progress --buffered --language --base64"
 
 __objects()
 {
-   ./psobjects | cut -d ' ' -f 1
+   psobjects | cut -d ' ' -f 1
 }
 
 __object()
 {
-   ./psobjects | cut -d ' ' -f 2
+   psobjects | cut -d ' ' -f 2
 }
 
 __objects2object()
 {
-    ./psobjects | grep ^$1 | cut -d ' ' -f 2
+    psobjects | grep ^$1 | cut -d ' ' -f 2
 }
 
 __object2objects()
 {
-    ./psobjects | grep " $1" | cut -d ' ' -f 1
+    psobjects | grep " $1" | cut -d ' ' -f 1
 }
 
 __props()
 {
-    ./psprops "$1"
+    psprops "$1"
 }
 
 _pslist() 

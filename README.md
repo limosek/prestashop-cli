@@ -20,6 +20,7 @@ Prestasoph-cli needs php5 cli and PHP pear package. It is theoreticaly possible 
 but it is not tested. On debian systems, use:
 ```
 $ sudo apt-get install php5-cli php-pear php5-curl git
+$ sudo pear install console_getopt cache_lite
 $ git clone https://github.com/limosek/prestashop-cli.git
 $ cd prestashop-cli
 $ . env.sh
@@ -28,6 +29,11 @@ $ {pslist|psget|psprops|psupdate|psdel|psenable|psdisable} [options]
 If you use env.sh, autocompletion is working automaticaly so you can use TAB. 
 If you run command without parameters, it will show help options.
 You can even use --help to get more help.
+
+If you want to use this utilities offten and you do not want to run env.sh any time:
+```
+$ sh $PWD/env.sh install >>~/.profile
+```
 
 ## Configuration ##
 First, enable API access in your Prestashop and create API token.
