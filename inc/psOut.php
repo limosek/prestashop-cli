@@ -29,6 +29,8 @@ class psOut extends StdClass {
                 break;
             case "env": self::env($data);
                 break;
+	    case "pscli": self::pscli($data);
+                break;
 	    case "envid": self::envid($data);
                 break;
             case "xml": self::xml($data);
@@ -47,6 +49,12 @@ class psOut extends StdClass {
         switch (self::$oformat) {
             case "xml": 
                 if (self::$context) { echo "<".self::$context.">\n"; }
+                break;
+	    case "pscli": 
+		$options="";
+		if (self::$base64) $options="--base64";
+		if (self::$htmlescape) $options="--htmlescape";
+                echo "psadd $options ".self::$context." ";
                 break;
         }
     }
@@ -85,10 +93,6 @@ class psOut extends StdClass {
     
     public function slashes($str) {
         $ret=$str;
-        /*for ($i=0;$i<strlen(self::ESCAPECHARS);$i++) {
-            $char=substr(self::ESCAPECHARS,$i,1);
-            $ret=preg_replace("/\\$char/m","\\$char",$ret);
-        }*/
         return(addcslashes($str,self::ESCAPECHARS));
     }
     
@@ -154,6 +158,14 @@ class psOut extends StdClass {
         echo "\n";
     }
 
+    public function pscli($data) {
+        foreach ($data as $column => $value) {
+	    if ($column=="id") continue;
+            echo sprintf('%s="%s" ', $column, self::slashes(self::expvar($value)));
+        }
+        echo "\n";
+    }
+
     public function php($data) {
         var_export($data);
     }
@@ -164,17 +176,18 @@ class psOut extends StdClass {
     
     public function xml($data) {
         $row = self::$category;
-        echo " <$row>\n";
+        if ($row) echo " <$row>\n";
         foreach ($data as $column => $value) {
             echo sprintf("  <%s>%s</%s>\n", $column, self::expvar($value), $column);
         }
-        echo " </$row>\n";
+        if ($row) echo " </$row>\n";
     }
     
     public function help() {
         self::msg("Output formats:\n");
         self::msg("cli      - Output suitable for next CLI parsing\n");
         self::msg("cli2     - Output suitable for next CLI parsing (fields enclosed in quotes)\n");
+	self::msg("pscli    - Output as pscli command to recreate object(s)\n");
         self::msg("ml       - Multiline output suitable for next CLI parsing\n");
         self::msg("csv      - CSV output\n");
         self::msg("xml      - XML output\n");

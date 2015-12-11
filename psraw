@@ -1,0 +1,47 @@
+#!/usr/bin/env php
+<?php
+require(__DIR__ . "/inc/common.php");
+
+psGet::init($argv);
+$args=PsGet::$args;
+if (sizeof($args)<2) {
+	psOut::msg("Do not use this command directly. It is used only for testing purposes!\n");
+	psOut::error("psraw action object [file]");
+}
+
+$action=array_shift($args);
+$object=array_shift($args);
+$file=array_shift($args);
+
+if (!$file) $file="php://stdin";
+
+psGet::readcfg(Array("global",$object));
+
+$webService = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
+$xmlop=false;
+
+switch ($action) {
+	case "add":
+		$inputxml=file_get_contents($file);
+		$xmlop='postXml';
+		break;
+	case "update":
+		$inputxml=file_get_contents($file);
+		$xmlop='putXml';
+		$action="edit";
+		break;
+}
+$opt=Array(
+	'resource' => $object
+);
+if ($xmlop) {
+	$opt[$xmlop] = $inputxml;
+}
+
+if (psCli::$debug) {
+	psOut::msg(print_r($opt,true));
+}
+
+$xml = $webService->$action($opt);
+
+

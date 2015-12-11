@@ -92,7 +92,11 @@ class psCli extends StdClass {
         ),
         "product" => Array(
             "manufacturer_name" => self::P_RO,
-            "quantity" => self::P_RO
+            "quantity" => self::P_RO,
+	    "date_add" => self::P_RO,
+	    "date_upd" => self::P_RO,
+	    "associations" => self::P_RO
+	    
         ),
         "combination" => Array(
             "id_product_option" => self::P_VIRTUAL

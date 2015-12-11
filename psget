@@ -11,7 +11,7 @@ try {
     $args=PsGet::$args;
     array_shift($args);
     if (count($args)<1) {
-        PsOut::error("Error! Enter object[s] you want to get.\n".basename(__FILE__)
+        PsOut::error("Error! Enter object you want to get.\n".basename(__FILE__)
                 . " resource id [property]...\n"
                 . "Property '*' or empty properties means everything.\n"
                 . "Use --help to see available resources\n"

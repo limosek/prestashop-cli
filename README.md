@@ -71,6 +71,9 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 [delete]
 ; Parameters for updating objects
 
+[delete]
+; Parameters for adding objects
+
 [addresses]
 ; Parameters for listing specific kind of objects
 ; Uncomment next lines and pslist addresses will always return firstname,lastname and city
@@ -83,6 +86,11 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ## Use ##
+
+Please, remember that this utils are not best efficient way how to manage internal data. It is for scripting and mass editing purposes but of course, 
+direct SQL command could be much more faster. But power of this utils is in fact that it use standard web services and all actions are controlled by web server
+so there is no problem that database structure could be damaged. Next to this, this utils does not need any DB access or direct access to filesystem of web server.
+If you want make this utils really faster, please use --cache parameter. But take care that cached informations are not real informations.
 
 ### Available resources ###
 In theory, any resource can be fetched/set. See --help option of any command.
@@ -262,6 +270,19 @@ $ ./psupdate product 8 quantity=10
 $ ./psupdate product 8 quantity=10 price=20 # (set both values)
 ```
 
+### Add object ###
+You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use pscli output of psget to "clone" objects. It is goog idea to use base64 encoding for data to not collide with shell expansion.
+
+```
+$ psget -Fpscli address 10
+psadd  address id_customer="1" id_manufacturer="0" id_supplier="0" id_warehouse="0" id_country="8" id_state="0" alias="Mon adresse" company="My Company" lastname="DOE" firstname="John" vat_number="" address1="16, Main street" address2="2nd floor" postcode="75002" city="Paris " other="" phone="0102030405" phone_mobile="" dni="" deleted="0" date_add="2014-05-15 15\:14\:48" date_upd="2014-05-15 15\:14\:48"
+
+psget --base64 -Fpscli address 10
+psadd --base64 address id_customer="MQ==" id_manufacturer="MA==" id_supplier="MA==" id_warehouse="MA==" id_country="OA==" id_state="MA==" alias="TW9uIGFkcmVzc2U=" company="TXkgQ29tcGFueQ==" lastname="RE9F" firstname="Sm9obg==" vat_number="" address1="MTYsIE1haW4gc3RyZWV0" address2="Mm5kIGZsb29y" postcode="NzUwMDI=" city="UGFyaXMg" other="" phone="MDEwMjAzMDQwNQ==" phone_mobile="" dni="" deleted="MA==" date_add="MjAxNC0wNS0xNSAxNToxNDo0OA==" date_upd="MjAxNC0wNS0xNSAxNToxNDo0OA==" 
+
+$(psget --base64 -Fpscli address 1)
+```
+
 ### Enable or disable object ###
 ```
 $ ./psenable product 8
@@ -275,13 +296,49 @@ $ ./psdisable product 8
 ```
 
 ## Output modes ##
-Available output modes: cli, cli2, csv, env, php, ml
+Available output modes: cli, cli2, csv, env, php, ml.
+Cli, Cli2 and Ml are good for next parsing by shell utils. Csv is good for exporting objects. Env can be used to set shell environment variables directly. Php is for testing purposes.
+There is one output which can be used for recreating objects, named pscli.
+
 ```
-$ ./get product --output-mode=csv 8
-$ ./get product --output-format=xml 8
-$ ./get product --output-format=php 8
-$ ./get product --output-format=env 8
-$ ./get product --output-format=ml 8
+$ ./get --output-mode=csv address 1
+"1";"1";"0";"0";"0";"8";"0";"Mon adresse";"My Company";"DOE";"John";"";"16, Main street";"2nd floor";"75002";"Paris ";"";"0102030405";"";"";"0";"2014-05-15 15\:14\:48";"2014-05-15 15\:14\:48";
+
+$ ./get --output-mode=cli address 1
+1 1 0 0 0 8 0 Mon adresse My Company DOE John  16, Main street 2nd floor 75002 Paris   0102030405   0 2014-05-15 15\:14\:482014-05-15 15\:14\:48
+
+$ ./get --output-mode=cli2 address 1
+"1" "1" "0" "0" "0" "8" "0" "Mon adresse" "My Company" "DOE" "John" "" "16, Main street" "2nd floor" "75002" "Paris " "" "0102030405" "" "" "0" "2014-05-15 15\:14\:48""2014-05-15 15\:14\:48"
+
+$ ./get --output-mode=xml address 1
+<address>
+  <id>1</id>
+  <id_customer>1</id_customer>
+  <id_manufacturer>0</id_manufacturer>
+  <id_supplier>0</id_supplier>
+  <id_warehouse>0</id_warehouse>
+  <id_country>8</id_country>
+  <id_state>0</id_state>
+  <alias>Mon adresse</alias>
+  <company>My Company</company>
+  <lastname>DOE</lastname>
+  <firstname>John</firstname>
+  <vat_number></vat_number>
+  <address1>16, Main street</address1>
+  <address2>2nd floor</address2>
+  <postcode>75002</postcode>
+  <city>Paris </city>
+  <other></other>
+  <phone>0102030405</phone>
+  <phone_mobile></phone_mobile>
+  <dni></dni>
+  <deleted>0</deleted>
+  <date_add>2014-05-15 15:14:48</date_add>
+  <date_upd>2014-05-15 15:14:48</date_upd>
+</address>
+
+$ ./get product --output-format=pscli 8
+psadd  address id_customer="1" id_manufacturer="0" id_supplier="0" id_warehouse="0" id_country="8" id_state="0" alias="Mon adresse" company="My Company" lastname="DOE" firstname="John" vat_number="" address1="16, Main street" address2="2nd floor" postcode="75002" city="Paris " other="" phone="0102030405" phone_mobile="" dni="" deleted="0" date_add="2014-05-15 15\:14\:48" date_upd="2014-05-15 15\:14\:48"
 ```
 
 # Licence
