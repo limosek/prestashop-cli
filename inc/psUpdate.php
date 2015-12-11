@@ -7,11 +7,18 @@ class psUpdate extends stdClass {
     public function decode($var) {        
         if (psOut::$base64) {
             $var=base64_decode($var);
-        }
+        } else {
+	    $var=self::stripslashes($var);
+	}
 	if (psOut::$htmlescape) {
             $var=htmlspecialchars_decode($var);
         }
 	return($var);
+    }
+
+    public function stripslashes($str) {
+        $ret=$str;
+        return(stripcslashes($str));
     }
 
     public function create($fstr) {

@@ -71,7 +71,7 @@ shop-key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 [delete]
 ; Parameters for updating objects
 
-[delete]
+[add]
 ; Parameters for adding objects
 
 [addresses]
@@ -271,7 +271,7 @@ $ ./psupdate product 8 quantity=10 price=20 # (set both values)
 ```
 
 ### Add object ###
-You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use pscli output of psget to "clone" objects. It is goog idea to use base64 encoding for data to not collide with shell expansion.
+You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use pscli output of psget to "clone" objects. It is goog idea to use base64 encoding for data to not collide with shell expansion. Do not forget that it is not full clone of object! Only parameters accessible via API are cloned.
 
 ```
 $ psget -Fpscli address 10

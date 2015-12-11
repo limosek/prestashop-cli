@@ -4,6 +4,21 @@ This directory contains demo scripts how this tools can be used. Feel free to co
 Here are some basic scripts. Please, this tools **are NOT** optimized for speed. Api calls can be very slow according to direct DB access.
 Be sure to use cache for API calls. (see main README how to enable it).
 
+## export-objects.sh ##
+To export all kind of objects, use this tool. Data in CSV will be base64 encoded.
+```
+$ export-objects.sh products products.csv base64
+
+```
+
+## import-objects.sh ##
+To export all kind of objects, use this tool. Data in CSV will be base64 encoded. Be afraid! This is not backup! 
+Products will be cloned!
+```
+$ import-objects.sh product products.csv base64
+
+```
+
 ## link-category-to-groups.sh ##
 
 Did you create many new categories and you want to link many customers groups for them? Here is solution.

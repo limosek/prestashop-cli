@@ -14,7 +14,12 @@ try {
                 . "Use --help to get more informations\n"
                 . "\n");
     }
-    $objects=psCli::upobject($object);
+    if (array_key_exists($object,psCli::$resources)) {
+	$objects=$object;
+	$object=psCli::subobject($objects);
+    } else {
+    	$objects=psCli::upobject($object);
+    }
     psCli::initApi();
     $opt = array('resource' => $objects);
     $xml = psCli::apiCmd("get",$opt);
@@ -23,7 +28,9 @@ try {
     $rowobject = json_decode(json_encode($xml->children()->$object));
     $rowdata=psGet::getProperties(psCli::filterProps($xml->children()->$object));
     foreach ($rowdata as $p) {
-        echo  $p."\n";
+	if (!(psCli::getPropFeature($object,$p) & psCli::P_VIRTUAL)) {
+        	echo  $p."\n";
+	}
     }
     psOut::end($object);
 } catch (PrestaShopWebserviceException $e) {

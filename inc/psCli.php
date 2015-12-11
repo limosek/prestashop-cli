@@ -88,14 +88,14 @@ class psCli extends StdClass {
     );
     static $propfeatures = Array(
         "*" => Array(
-            "associations" => self::P_RO
+            "associations" => self::P_RO|self::P_VIRTUAL
         ),
         "product" => Array(
             "manufacturer_name" => self::P_RO,
             "quantity" => self::P_RO,
 	    "date_add" => self::P_RO,
 	    "date_upd" => self::P_RO,
-	    "associations" => self::P_RO
+	    "associations" => self::P_RO|self::P_VIRTUAL
 	    
         ),
         "combination" => Array(
@@ -329,6 +329,24 @@ class psCli extends StdClass {
         }
         return($out);
     }
+
+   public function getPropFeature($name,$prop) {
+	if (array_key_exists($name, psCli::$propfeatures)) {
+		if (array_key_exists($prop, psCli::$propfeatures[$name])) {
+			return(psCli::$propfeatures[$name][$prop]);
+		} else {
+			return(psCli::P_DEFAULT);
+		}
+	} elseif (array_key_exists('*', psCli::$propfeatures)) {
+		if (array_key_exists($prop, psCli::$propfeatures['*'])) {
+			return(psCli::$propfeatures['*'][$prop]);
+		} else {
+			return(psCli::P_DEFAULT);
+		}
+	} else {
+		return(psCli::P_DEFAULT);
+	}
+   }
 
     public function filterProps($obj) {
         $name = $obj->getName();
