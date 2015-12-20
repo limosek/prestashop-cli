@@ -3,17 +3,20 @@
 ###########################################################
 ## This script is used as practical guide to prestashop-cli 
 ## It will export customers and addresses to csv
-## If there is one argument, it is number which is
+## Fist argument is number which is added to all customerid. Can be 0.
+## Rest of arguments are standard pslist filters
 ## added to ids of customer to avoid conflicts.
 ###########################################################
 
-if [ -n "$1" ]; then
-  idshift="$1"
-else
-  idshift=0
+if [ -z "$1" ]; then
+   echo "$0 idshift [filter1]...[filtern]"
+   exit 1
 fi
 
-customers=$(pslist customers)
+idshift=$1
+shift
+
+customers=$(pslist customers "$@")
 
 for c in $customers; do
     eval $(psget -Fenv customer $c)

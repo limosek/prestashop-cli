@@ -12,6 +12,7 @@ If you found this project usefull, you can help to improve it (yes, it is openso
 into contrib directory of this project. So if you made some script which will do some mass operation with your Prestashop, 
 please contact me and I will share it [here](https://github.com/limosek/prestashop-cli/tree/master/contrib).
 Of course you can send some donations to bitcoin address **1EaKkkLKqC6f9DiMPUfMvbRXWJZBebe1Yx**
+
 ![QR code](https://raw.githubusercontent.com/limosek/prestashop-cli/master/bitcoin-address.png)
 
 # Howto
@@ -246,7 +247,7 @@ $ ./pslist languages name iso_code active active=1
 
 ### List product with filter and more fields ###
 You can use one or more filters. There is logical and between filter outputs. 
-Filter operators are =,<,>,~,!=,!~ (equal, less than, bigger than, regexp, not equal, not regexp)
+Filter operators are =,<,>,%<,%>,~,!=,!~ (equal, less than, bigger than, older than, newwe than, regexp, not equal, not regexp)
 Do not forget to use '' due to shell special characters!
 By default only ids are returned. To return more properties, use property name without filter.
 ```
@@ -254,6 +255,7 @@ By default only ids are returned. To return more properties, use property name w
 $ ./pslist products condition=new      price                     name                      'price>10'
 $ ./pslist products id_manucacturer=1
 $ ./pslist products 'price>10' id_manucacturer=1 # (logical and)
+$ ./pslist products 'date_add%>2 day ago' # To compare date
 $ (./pslist products 'price>10'; ./pslist products id_manucacturer=1) # (logical or)
 ```
 

@@ -33,7 +33,15 @@ class psFilter extends StdClass {
             return(false);
         }
         foreach ($fstr as $f) {
-            if (preg_match("/(.*)>(.*)/", $f)) {
+	    if (preg_match("/(.*)%<(.*)/", $f)) {
+                preg_match("/(.*)%<(.*)/", $f, $farr);
+                self::addapifield($farr[1]);
+                $filter["dlt"][$farr[1]] = $farr[2];
+            } elseif (preg_match("/(.*)%>(.*)/", $f)) {
+                preg_match("/(.*)%>(.*)/", $f, $farr);
+                self::addapifield($farr[1]);
+                $filter["dgt"][$farr[1]] = $farr[2];
+            } elseif (preg_match("/(.*)>(.*)/", $f)) {
                 preg_match("/(.*)>(.*)/", $f, $farr);
                 self::addapifield($farr[1]);
                 $filter["gt"][$farr[1]] = $farr[2];
@@ -68,15 +76,6 @@ class psFilter extends StdClass {
         self::$filter=$filter;
         return($filter);
     }
-    
-    private function isDate($val) {
-	if (preg_match("/^\d\d\d\d-\d\d-\d\d/",$val)) {
-	  $d=New DateTime($val);
-	  return($d->getTimestamp());
-	} else {
-	  return($val);
-	}
-    }
 
     public function isFiltered($obj) {
         if (!is_array(self::$filter) || count(self::$filter) == 0)
@@ -85,7 +84,7 @@ class psFilter extends StdClass {
         $fout = false;
         $name=$obj->getName();
         foreach (self::$filter as $type => $f) {
-            foreach ($f as $attr => $val) {
+            foreach ($f as $attr => $fval) {
                 if (psGet::getLanguageObj($obj->$attr,$attr)) {
                     $isset=psGet::getLanguageObj($obj->$attr,$attr);
                     $data=(string) $isset[0];
@@ -105,44 +104,50 @@ class psFilter extends StdClass {
                 if ($isset) {
                     switch ($type) {
                         case "eq":
-			    $val=self::isDate($val);
-			    $data=self::isDate($data);
-                            if (!($data == $val)) {
+                            if (!($data == $fval)) {
                                 $fout = true;
-                                $fwhy = "$attr=$val";
+                                $fwhy = "$attr=$fval";
                             }
                             break;
                         case "gt":
-			    $val=self::isDate($val);
-			    $data=self::isDate($data);
-                            if (!($data > $val)) {
+                            if (!($data > $fval)) {
                                 $fout = true;
-                                $fwhy = "$attr>$val";
+                                $fwhy = "$attr>$fval";
                             }
                             break;
                         case "lt":
-			    $val=self::isDate($val);
-			    $data=self::isDate($data);
-                            if (!($data < $val)) {
+                            if (!($data < $fval)) {
                                 $fout = true;
-                                $fwhy = "$attr<$val";
+                                $fwhy = "$attr<$fval";
+                            }
+                            break;
+                        case "dgt":
+                            if (!(New DateTime($data) > New DateTime($fval))) {
+                                $fout = true;
+                                $fwhy = "$attr%>$fval";
+                            }
+                            break;
+                        case "dlt":
+                            if (!(New DateTime($data) < New DateTime($fval))) {
+                                $fout = true;
+                                $fwhy = "$attr%<$fval";
                             }
                             break;
                         case "re":
-                            if (!preg_match("/$val/", $data)) {
+                            if (!preg_match("/$fval/", $data)) {
                                 $fout = true;
-                                $fwhy = "$attr~$val";
+                                $fwhy = "$attr~$fval";
                             }
                             break;
                         case "nre":
-                            if (preg_match("/$val/", $data)) {
+                            if (preg_match("/$fval/", $data)) {
                                 $fout = true;
-                                $fwhy = "$attr~=$val";
+                                $fwhy = "$attr~=$fval";
                             }
 			case "neq":
-                            if ($data == $val) {
+                            if ($data == $fval) {
                                 $fout = true;
-                                $fwhy = "$attr!=$val";
+                                $fwhy = "$attr!=$fval";
                             }
                             break;
                     }

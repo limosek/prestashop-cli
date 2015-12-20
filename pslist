@@ -17,9 +17,11 @@ try {
                 . "property=value to match exactly\n"
                 . "property>value to match objects with property bigger than value\n"
                 . "property<value to match objects with property lower than value\n"
+                . "property%>value to match objects with property newer than value (DateTime format)\n"
+                . "property%<value to match objects with property older than value (DateTime format)\n"
                 . "property!~value to match objects with property matched by regexp\n"
 		. "property!=value to match object not equal to value\n"
-                . "id to match only objects with this ids\n"
+                . "number to match only objects with this ids\n"
                 . "property to output given property.\n"
                 . "Use --help to get more informations\n\n"
                 );
