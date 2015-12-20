@@ -68,6 +68,15 @@ class psFilter extends StdClass {
         self::$filter=$filter;
         return($filter);
     }
+    
+    private function isDate($val) {
+	if (preg_match("/^\d\d\d\d-\d\d-\d\d/",$val)) {
+	  $d=New DateTime($val);
+	  return($d->getTimestamp());
+	} else {
+	  return($val);
+	}
+    }
 
     public function isFiltered($obj) {
         if (!is_array(self::$filter) || count(self::$filter) == 0)
@@ -96,18 +105,24 @@ class psFilter extends StdClass {
                 if ($isset) {
                     switch ($type) {
                         case "eq":
+			    $val=self::isDate($val);
+			    $data=self::isDate($data);
                             if (!($data == $val)) {
                                 $fout = true;
                                 $fwhy = "$attr=$val";
                             }
                             break;
                         case "gt":
+			    $val=self::isDate($val);
+			    $data=self::isDate($data);
                             if (!($data > $val)) {
                                 $fout = true;
                                 $fwhy = "$attr>$val";
                             }
                             break;
                         case "lt":
+			    $val=self::isDate($val);
+			    $data=self::isDate($data);
                             if (!($data < $val)) {
                                 $fout = true;
                                 $fwhy = "$attr<$val";

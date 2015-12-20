@@ -27,17 +27,17 @@ __object()
 
 __objects2object()
 {
-    psobjects | grep ^$1 | cut -d ' ' -f 2
+    psobjects | grep ^"$1 " | tr -s ' ' | cut -d ' ' -f 2
 }
 
 __object2objects()
 {
-    psobjects | grep " $1" | cut -d ' ' -f 1
+    psobjects | tr -s ' ' | grep " $1 " | cut -d ' ' -f 1
 }
 
 __props()
 {
-    psprops "$1"
+    [ -n "$1" ] && psprops "$1"
 }
 
 _pslist() 
