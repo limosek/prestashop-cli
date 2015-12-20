@@ -255,6 +255,7 @@ By default only ids are returned. To return more properties, use property name w
 $ ./pslist products condition=new      price                     name                      'price>10'
 $ ./pslist products id_manucacturer=1
 $ ./pslist products 'price>10' id_manucacturer=1 # (logical and)
+$ ./pslist products 'reference!=' # To list all products without reference
 $ ./pslist products 'date_add%>2 day ago' # To compare date
 $ (./pslist products 'price>10'; ./pslist products id_manucacturer=1) # (logical or)
 ```
@@ -273,16 +274,16 @@ $ ./psupdate product 8 quantity=10 price=20 # (set both values)
 ```
 
 ### Add object ###
-You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use pscli output of psget to "clone" objects. It is goog idea to use base64 encoding for data to not collide with shell expansion. Do not forget that it is not full clone of object! Only parameters accessible via API are cloned.
+You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use psadd output of psget to "clone" objects. It is goog idea to use base64 encoding for data to not collide with shell expansion. Do not forget that it is not full clone of object! Only parameters accessible via API are cloned.
 
 ```
-$ psget -Fpscli address 10
+$ psget -Fpsadd address 10
 psadd  address id_customer="1" id_manufacturer="0" id_supplier="0" id_warehouse="0" id_country="8" id_state="0" alias="Mon adresse" company="My Company" lastname="DOE" firstname="John" vat_number="" address1="16, Main street" address2="2nd floor" postcode="75002" city="Paris " other="" phone="0102030405" phone_mobile="" dni="" deleted="0" date_add="2014-05-15 15\:14\:48" date_upd="2014-05-15 15\:14\:48"
 
-psget --base64 -Fpscli address 10
+psget --base64 -Fpsadd address 10
 psadd --base64 address id_customer="MQ==" id_manufacturer="MA==" id_supplier="MA==" id_warehouse="MA==" id_country="OA==" id_state="MA==" alias="TW9uIGFkcmVzc2U=" company="TXkgQ29tcGFueQ==" lastname="RE9F" firstname="Sm9obg==" vat_number="" address1="MTYsIE1haW4gc3RyZWV0" address2="Mm5kIGZsb29y" postcode="NzUwMDI=" city="UGFyaXMg" other="" phone="MDEwMjAzMDQwNQ==" phone_mobile="" dni="" deleted="MA==" date_add="MjAxNC0wNS0xNSAxNToxNDo0OA==" date_upd="MjAxNC0wNS0xNSAxNToxNDo0OA==" 
 
-$(psget --base64 -Fpscli address 1)
+$(psget --base64 -Fpsadd address 1)
 ```
 
 ### Enable or disable object ###
@@ -298,21 +299,21 @@ $ ./psdisable product 8
 ```
 
 ## Output modes ##
-Available output modes: cli, cli2, csv, env, php, ml.
+Available output modes: cli, cli2, csv, env, envarr, php, ml, psadd, psupdate.
 Cli, Cli2 and Ml are good for next parsing by shell utils. Csv is good for exporting objects. Env can be used to set shell environment variables directly. Php is for testing purposes.
-There is one output which can be used for recreating objects, named pscli.
+There is one output which can be used for recreating objects, named psadd or modifying object psupdate.
 
 ```
-$ ./get --output-mode=csv address 1
+$ psget --output-format=csv address 1
 "1";"1";"0";"0";"0";"8";"0";"Mon adresse";"My Company";"DOE";"John";"";"16, Main street";"2nd floor";"75002";"Paris ";"";"0102030405";"";"";"0";"2014-05-15 15\:14\:48";"2014-05-15 15\:14\:48";
 
-$ ./get --output-mode=cli address 1
+$ psget --output-format=cli address 1
 1 1 0 0 0 8 0 Mon adresse My Company DOE John  16, Main street 2nd floor 75002 Paris   0102030405   0 2014-05-15 15\:14\:482014-05-15 15\:14\:48
 
-$ ./get --output-mode=cli2 address 1
+$ ./get --output-format=cli2 address 1
 "1" "1" "0" "0" "0" "8" "0" "Mon adresse" "My Company" "DOE" "John" "" "16, Main street" "2nd floor" "75002" "Paris " "" "0102030405" "" "" "0" "2014-05-15 15\:14\:48""2014-05-15 15\:14\:48"
 
-$ ./get --output-mode=xml address 1
+$ psget --output-mode=xml address 1
 <address>
   <id>1</id>
   <id_customer>1</id_customer>
@@ -339,8 +340,19 @@ $ ./get --output-mode=xml address 1
   <date_upd>2014-05-15 15:14:48</date_upd>
 </address>
 
-$ ./get product --output-format=pscli 8
+$ psget --output-format=psadd product 8
 psadd  address id_customer="1" id_manufacturer="0" id_supplier="0" id_warehouse="0" id_country="8" id_state="0" alias="Mon adresse" company="My Company" lastname="DOE" firstname="John" vat_number="" address1="16, Main street" address2="2nd floor" postcode="75002" city="Paris " other="" phone="0102030405" phone_mobile="" dni="" deleted="0" date_add="2014-05-15 15\:14\:48" date_upd="2014-05-15 15\:14\:48"
+
+$ psget --output-format=psupdate product 8 id name 
+psupdate  product 8 name='Kostivalová mast'
+
+$ psget --output-format=env product 8
+id='8'; id_manufacturer='2'; id_supplier='0'; id_category_default='12'; new=''; cache_default_attribute='80'; id_default_image='95'; id_default_combination='80'; id_tax_rules_group='0'; position_in_category='1'; manufacturer_name='Odeli.cz'; quantity='0'; type='simple'; id_shop_default='1'; reference='odeli-p-150'; supplier_reference=''; location=''; width='7.000000'; height='4.500000'; depth='4.500000'; weight='0.060000'; quantity_discount='0'; ean13='0'; upc=''; cache_is_pack='0'; cache_has_attachments='0'; is_virtual='0'; on_sale='0'; online_only='0'; ecotax='0.000000'; minimal_quantity='1'; ...
+
+$ pslist --output-format=envarr customers firstname lastname
+id[2]='2'; firstname[2]='aaa'; lastname[2]='ccc'; 
+id[3]='3'; firstname[3]='bbb'; lastname[3]='ddd'; 
+
 ```
 
 # Licence

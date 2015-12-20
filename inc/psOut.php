@@ -9,6 +9,8 @@ class psOut extends StdClass {
     static $buffered = false;
     static $context = false;
     static $category = "row";
+    static $csvsep = ";";
+    static $first;
     const ESCAPECHARS = "\n\r\":|<>&;()[]*\$#!";
     
     public function write($data) {
@@ -29,7 +31,11 @@ class psOut extends StdClass {
                 break;
             case "env": self::env($data);
                 break;
-	    case "pscli": self::pscli($data);
+            case "envarr": self::envarr($data);
+                break;
+	    case "psadd": self::psadd($data);
+                break;
+            case "psupdate": self::psupdate($data);
                 break;
 	    case "envid": self::envid($data);
                 break;
@@ -41,21 +47,32 @@ class psOut extends StdClass {
                 break;
             default: self::error("Unknown output format " . self::$oformat);
         }
+        self::$first=false;
     }
     
     public function begin($context=false,$category=false) {
         self::$context=$context;
         self::$category=$category;
+        self::$first=true;
         switch (self::$oformat) {
             case "xml": 
                 if (self::$context) { echo "<".self::$context.">\n"; }
                 break;
-	    case "pscli": 
+	    case "psadd":
 		$options="";
 		if (self::$base64) $options="--base64";
 		if (self::$htmlescape) $options="--htmlescape";
                 echo "psadd $options ".self::$context." ";
                 break;
+	    case "psupdate":
+		$options="";
+		if (self::$base64) $options="--base64";
+		if (self::$htmlescape) $options="--htmlescape";
+                echo "psupdate $options ".self::$context." ";
+                break;
+            case "envarr":
+		echo "declare -A $context; ";
+		break;
         }
     }
 
@@ -64,6 +81,10 @@ class psOut extends StdClass {
             case "xml": 
                 if (self::$context) { echo "</".self::$context.">\n"; }
                 break;
+            case "env":
+            case "envarr":
+                echo "\n";
+		break;
         }
     }
 
@@ -94,6 +115,16 @@ class psOut extends StdClass {
     public function slashes($str) {
         $ret=$str;
         return(addcslashes($str,self::ESCAPECHARS));
+    }
+    
+    public function csvslashes($str) {
+        $ret=$str;
+        return(addcslashes($str,"\n\r\"".self::$csvsep));
+    }
+    
+    public function envslashes($str) {
+        $ret=$str;
+        return(addcslashes($str,"\n\r\"".self::$csvsep));
     }
     
     public function encode($var) {
@@ -139,29 +170,35 @@ class psOut extends StdClass {
 
     public function csv($data) {
         foreach ($data as $column => $value) {
-            echo '"' .  self::slashes(self::expvar($value)) . '";';
+            echo '"' .  self::csvslashes(self::expvar($value)) . '"'.self::$csvsep;
         }
         echo "\n";
     }
 
     public function env($data) {
         foreach ($data as $column => $value) {
-            echo sprintf('%s="%s"; ', $column, self::slashes(self::expvar($value)));
+            echo sprintf("%s='%s'; ", $column, self::envslashes(self::expvar($value)));
         }
-        echo "\n";
     }
 
-    public function envid($data) {
+    public function envarr($data) {
         foreach ($data as $column => $value) {
-            echo sprintf('%s_%s="%s"; ', $column, $data["id"], self::slashes(self::expvar($value)));
+            echo sprintf("%s[%s,%s]='%s'; ", self::$context, $data["id"], $column, self::envslashes(self::expvar($value)));
         }
-        echo "\n";
     }
 
-    public function pscli($data) {
+    public function psadd($data) {
         foreach ($data as $column => $value) {
 	    if ($column=="id") continue;
-            echo sprintf('%s="%s" ', $column, self::slashes(self::expvar($value)));
+            echo sprintf("%d %s='%s'", $column, self::slashes(self::expvar($value)));
+        }
+        echo "\n";
+    }
+    
+    public function psupdate($data) {
+        foreach ($data as $column => $value) {
+	    if ($column=="id") continue;
+            echo sprintf("%d %s='%s'", $data["id"], $column, self::slashes(self::expvar($value)));
         }
         echo "\n";
     }
@@ -189,10 +226,10 @@ class psOut extends StdClass {
         self::msg("cli2     - Output suitable for next CLI parsing (fields enclosed in quotes)\n");
 	self::msg("pscli    - Output as pscli command to recreate object(s)\n");
         self::msg("ml       - Multiline output suitable for next CLI parsing\n");
-        self::msg("csv      - CSV output\n");
+        self::msg("csv      - CSV output (use --csv-separator to set separtor)\n");
         self::msg("xml      - XML output\n");
         self::msg("env      - Output suitable for environment setting\n");
-	self::msg("envid    - Output suitable for environment setting (variable suffix with id)\n");
+	self::msg("envarr   - Output suitable for environment setting (as bash array)\n");
     }
 
 }

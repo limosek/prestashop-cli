@@ -271,6 +271,7 @@ class psCli extends StdClass {
         psOut::$base64 = self::isarg("base64", $options);
 	psOut::$htmlescape = self::isarg("htmlescape", $options);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
+        psOut::$csvsep = self::getarg("csv-separator", $options, ";");
         self::$cache = self::isarg("cache", $options, false);
         self::$cachedir = self::getarg("cache-dir", $options, "/tmp/");
         self::$cachelife = self::getarg("cache-lifetime", $options, 3600);
