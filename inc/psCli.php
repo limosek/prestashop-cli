@@ -86,25 +86,7 @@ class psCli extends StdClass {
         'weight_ranges' => 'Weight ranges',
         'zones' => 'The Countries zones',
     );
-    static $propfeatures = Array(
-        "*" => Array(
-            "associations" => self::P_RO|self::P_VIRTUAL
-        ),
-        "product" => Array(
-            "manufacturer_name" => self::P_RO,
-            "quantity" => self::P_RO,
-	    "date_add" => self::P_RO,
-	    "date_upd" => self::P_RO,
-	    "associations" => self::P_RO|self::P_VIRTUAL
-	    
-        ),
-        "combination" => Array(
-            "id_product_option" => self::P_VIRTUAL
-        ),
-        "combinations" => Array(
-            "id_product_option" => self::P_VIRTUAL
-        )
-    );
+    static $propfeatures; 
 
     const E_URL = 2;
     const E_KEY = 3;
@@ -145,6 +127,25 @@ class psCli extends StdClass {
      */
     public function init($argv, $contexts = false) {
         psOut::$log = fopen('php://stderr', 'w+');
+        self::$propfeatures = Array(
+        "*" => Array(
+            "associations" => array(1)
+        ),
+        "product" => Array(
+            "manufacturer_name" => self::P_RO,
+            "quantity" => self::P_RO,
+	    "date_add" => self::P_RO,
+	    "date_upd" => self::P_RO,
+	    "associations" => self::P_RO|self::P_VIRTUAL
+	    
+        ),
+        "combination" => Array(
+            "id_product_option" => self::P_VIRTUAL
+        ),
+        "combinations" => Array(
+            "id_product_option" => self::P_VIRTUAL
+        )
+	);
         if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
             $shortopts = array_merge(self::$shortopts, parent::$shortopts);
         } else {
