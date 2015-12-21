@@ -7,7 +7,7 @@ class psFilter extends StdClass {
     static $objects;
 
     public function addapifilter($prop, $value) {
-        if (array_key_exists(self::$objects, psCli::$propfeatures) && array_key_exists($prop, psCli::$propfeatures[self::$objects]) && (psCli::$propfeatures[self::$objects][$prop] && psCli::P_VIRTUAL)) {
+        if (array_key_exists(self::$objects, psCli::$propfeatures) && array_key_exists($prop, psCli::$propfeatures[self::$objects]) && (psCli::$propfeatures[self::$objects][$prop] & psCli::P_VIRTUAL)) {
             return;
         } else {
             psCli::$apifilter[$prop] = $value;
@@ -15,7 +15,7 @@ class psFilter extends StdClass {
     }
 
     public function addapifield($prop) {
-        if (array_key_exists(self::$objects, psCli::$propfeatures) && array_key_exists($prop, psCli::$propfeatures[self::$objects]) && (psCli::$propfeatures[self::$objects][$prop] && psCli::P_VIRTUAL)) {
+        if (array_key_exists(self::$objects, psCli::$propfeatures) && array_key_exists($prop, psCli::$propfeatures[self::$objects]) && (psCli::$propfeatures[self::$objects][$prop] & psCli::P_VIRTUAL)) {
             return;
         } else {
             psCli::$apifields[$prop] = 1;

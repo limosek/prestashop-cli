@@ -144,6 +144,9 @@ class psCli extends StdClass {
         ),
         "combinations" => Array(
             "id_product_option" => self::P_VIRTUAL
+        ),
+        "products" => Array(
+            "id_product_option" => self::P_VIRTUAL
         )
 	);
         if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
@@ -353,7 +356,7 @@ class psCli extends StdClass {
     public function filterProps($obj) {
         $name = $obj->getName();
         $dom = @dom_import_simplexml($obj);
-
+        
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {
                 if (isset($obj->$p) && ($v & self::P_BAD)) {
