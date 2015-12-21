@@ -30,9 +30,9 @@ for c in $combinations; do
 	# Use env output format and eval it. It will set all variables.
   	eval $(psget -Fenv combination $c)
 	product=$(getproduct $id_product)
-    	option=$(getpov $id_product_option)
-    	optionvalue=$(getpov $id_product_option name)
-	optionname=$(getpo $(getpov $id_product_option id_attribute_group))
+    	option=$(getpov $id_product_option_value)
+    	optionvalue=$(getpov $id_product_option_value name)
+	optionname=$(getpo $(getpov $id_product_option_value id_attribute_group))
     	echo $product $price "$optionname:$optionvalue" \
 		$(pslist stock_availables id_product_attribute=$id quantity | cut -d ' ' -f 2)
 done

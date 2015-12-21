@@ -8,10 +8,22 @@
 csvline(){
   local i
   for i in "$@"; do
-    echo -En "\"$i\";"
+    echo -En '"'$i'";'
   done
   echo
 }
+
+getpo() 
+{
+	echo ${product_options[$1,name]}
+}
+
+# Get product option value for given id
+getpov() 
+{
+	echo ${product_option_values[$1,$2]} 
+}
+
 
 # Get all combination ids into variable. 
 combids=$(pslist combinations 'reference!=')
@@ -19,7 +31,7 @@ eval $(pslist -Fenvarr combinations 'reference!=' id_product price reference wei
 
 # Products with price=0 are combinations only for me
 prodids=$(pslist products active=1 'reference!=')
-eval $(pslist -Fenvarr products 'reference!=' price reference weight id_category_default description_short description name)
+eval $(pslist -Fenvarr '--delete-characters=;' products 'reference!=' price reference weight id_category_default description_short description name)
 
 # Get all product options
 eval $(pslist -Fenvarr product_options name)
@@ -34,11 +46,9 @@ for c in $combids; do
 	price=${combinations[$c,price]}
 	id_product=${combinations[$c,id_product]}
 	pprice=${products[$id_product,price]}
-	id_product_option=$(psget product $id_product id_product_option)
-    	option=${product_options[$c,$id_product_option]}
-    	optionvalue=${product_option_values[$id_product_option,name]}
-    	id_attribute_group=${product_option_values[$id_product_option,id_attribute_group]}
-	optionname=${product_options[$id_attribute_group,name]}
+	id_product_option_value=$(psget combination $c id_product_option_value)
+    	optionvalue=$(getpov $id_product_option_value name)
+	optionname=$(getpo $(getpov $id_product_option_value id_attribute_group))
 	id_category_default=${products[$id_product,id_category_default]}
 	category=${categories[$id_category_default,name]}
 	reference=${combinations[$c,reference]}

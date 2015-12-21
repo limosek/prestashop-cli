@@ -11,6 +11,7 @@ class psOut extends StdClass {
     static $category = "row";
     static $csvsep = ";";
     static $first;
+    static $delchars;
     const ESCAPECHARS = "\n\r\":|<>&;()[]*\$#!";
     
     public function write($data) {
@@ -113,21 +114,21 @@ class psOut extends StdClass {
     }
     
     public function slashes($str) {
-        $ret=$str;
         return(addcslashes($str,self::ESCAPECHARS));
     }
     
     public function csvslashes($str) {
-        $ret=$str;
-        return(addcslashes($str,"\n\r\"".self::$csvsep));
+        return(addcslashes($str,"\n\r\""));
     }
     
     public function envslashes($str) {
-        $ret=$str;
         return(addcslashes($str,"\n\r\"".self::$csvsep));
     }
     
     public function encode($var) {
+	if (self::$delchars) {
+	   $var=strtr($var,self::$delchars," ");
+	}
         if (self::$htmlescape) {
             $var=htmlspecialchars($var);
         }

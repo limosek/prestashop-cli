@@ -9,7 +9,7 @@ class psGet extends psCli {
         $obj=parent::filterProps($obj);
         if ($obj->xpath("associations/product_option_values/product_option_value")) {            
             $po=(string) $obj->xpath("associations/product_option_values/product_option_value")[0]->id;
-            $obj->addChild("id_product_option",$po);
+            $obj->addChild("id_product_option_value",$po);
         }
         return($obj);
     }

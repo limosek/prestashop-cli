@@ -21,6 +21,7 @@ class psCli extends StdClass {
         "properties=",
         "base64",
 	"htmlescape",
+	"delete-characters=",
         "buffered",
         "dry"
     );
@@ -140,13 +141,13 @@ class psCli extends StdClass {
 	    
         ),
         "combination" => Array(
-            "id_product_option" => self::P_VIRTUAL
+            "id_product_option_value" => self::P_VIRTUAL
         ),
         "combinations" => Array(
-            "id_product_option" => self::P_VIRTUAL
+            "id_product_option_value" => self::P_VIRTUAL
         ),
         "products" => Array(
-            "id_product_option" => self::P_VIRTUAL
+            "id_product_option_value" => self::P_VIRTUAL
         )
 	);
         if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
@@ -275,6 +276,7 @@ class psCli extends StdClass {
 	psOut::$htmlescape = self::isarg("htmlescape", $options);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
         psOut::$csvsep = self::getarg("csv-separator", $options, ";");
+        psOut::$delchars = self::getarg("delete-characters", $options, false);
         self::$cache = self::isarg("cache", $options, false);
         self::$cachedir = self::getarg("cache-dir", $options, "/tmp/");
         self::$cachelife = self::getarg("cache-lifetime", $options, 3600);
