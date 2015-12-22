@@ -15,13 +15,14 @@ class psCli extends StdClass {
         "verbose",
         "progress",
         "cache",
+        "clean-cache",
         "cache-dir=",
         "cache-lifetime=",
         "output-format=",
         "properties=",
         "base64",
-	"htmlescape",
-	"delete-characters=",
+        "htmlescape",
+        "delete-characters=",
         "buffered",
         "dry"
     );
@@ -87,7 +88,7 @@ class psCli extends StdClass {
         'weight_ranges' => 'Weight ranges',
         'zones' => 'The Countries zones',
     );
-    static $propfeatures; 
+    static $propfeatures;
 
     const E_URL = 2;
     const E_KEY = 3;
@@ -129,27 +130,26 @@ class psCli extends StdClass {
     public function init($argv, $contexts = false) {
         psOut::$log = fopen('php://stderr', 'w+');
         self::$propfeatures = Array(
-        "*" => Array(
-            "associations" => array(1)
-        ),
-        "product" => Array(
-            "manufacturer_name" => self::P_RO,
-            "quantity" => self::P_RO,
-	    "date_add" => self::P_RO,
-	    "date_upd" => self::P_RO,
-	    "associations" => self::P_RO|self::P_VIRTUAL
-	    
-        ),
-        "combination" => Array(
-            "id_product_option_value" => self::P_VIRTUAL
-        ),
-        "combinations" => Array(
-            "id_product_option_value" => self::P_VIRTUAL
-        ),
-        "products" => Array(
-            "id_product_option_value" => self::P_VIRTUAL
-        )
-	);
+            "*" => Array(
+                "associations" => array(1)
+            ),
+            "product" => Array(
+                "manufacturer_name" => self::P_RO,
+                "quantity" => self::P_RO,
+                "date_add" => self::P_RO,
+                "date_upd" => self::P_RO,
+                "associations" => self::P_RO | self::P_VIRTUAL
+            ),
+            "combination" => Array(
+                "id_product_option_value" => self::P_VIRTUAL
+            ),
+            "combinations" => Array(
+                "id_product_option_value" => self::P_VIRTUAL
+            ),
+            "products" => Array(
+                "id_product_option_value" => self::P_VIRTUAL
+            )
+        );
         if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
             $shortopts = array_merge(self::$shortopts, parent::$shortopts);
         } else {
@@ -224,10 +224,13 @@ class psCli extends StdClass {
     }
 
     public function readcfg($contexts) {
-        if (self::getarg("--shop",self::$goptions)) {
-            $contexts=Array_merge($contexts,Array("shop-".self::getarg("shop",self::$goptions)));
+        $shop="";
+        if (self::getarg("--shop", self::$goptions)) {
+            $contexts = Array_merge($contexts, Array("shop-" . self::getarg("shop", self::$goptions)));
+            $shop=self::getarg("shop", self::$goptions);
         } elseif (getenv("PS_SHOP")) {
-            $contexts=Array_merge($contexts,Array("shop-".getenv("PS_SHOP")));
+            $contexts = Array_merge($contexts, Array("shop-" . getenv("PS_SHOP")));
+            $shop=getenv("PS_SHOP");
         }
         if (file_exists(self::$cfgfile)) {
             $allfoptions = parse_ini_file(self::$cfgfile, true);
@@ -237,7 +240,7 @@ class psCli extends StdClass {
             foreach ($contexts as $context) {
                 if (array_key_exists($context, $allfoptions)) {
                     $foptions = array_merge($foptions, $allfoptions[$context]);
-                } elseif (preg_match("/shop-/",$context)) {
+                } elseif (preg_match("/shop-/", $context)) {
                     psOut::error("Config section for shop ($context) does not exists!");
                 }
             }
@@ -273,12 +276,20 @@ class psCli extends StdClass {
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
-	psOut::$htmlescape = self::isarg("htmlescape", $options);
+        psOut::$htmlescape = self::isarg("htmlescape", $options);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
         psOut::$csvsep = self::getarg("csv-separator", $options, ";");
         psOut::$delchars = self::getarg("delete-characters", $options, false);
         self::$cache = self::isarg("cache", $options, false);
-        self::$cachedir = self::getarg("cache-dir", $options, "/tmp/");
+        self::$cachedir = self::getarg("cache-dir", $options, dirname(__FILE__) . "/../tmp/".$shop."/");
+        if (self::isarg("clean-cache", $options, false)) {
+            system("rm ".self::$cachedir."/cache_*");
+        }
+        if (!file_exists(self::$cachedir)) {
+            if (!mkdir(self::$cachedir)) {
+                psOut::error("Cannot create cache directory " . self::$cachedir . " !");
+            }
+        }
         self::$cachelife = self::getarg("cache-lifetime", $options, 3600);
         self::$properties = self::reverseProps(self::getarg("properties", $options, Array(1 => "id")));
         if (!is_array(self::$properties)) {
@@ -297,32 +308,33 @@ class psCli extends StdClass {
         self::$options = $options;
         return($options);
     }
-    
+
     public function initApi() {
-	self::$api = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
+        self::$api = new PrestaShopWebservice(psCli::$shop_url, psCli::$shop_key, psCli::$debug);
     }
-    
-    public function apiCmd($cmd,$opt) {
-	$Cache_Lite = new Cache_Lite(array(
-	    'cacheDir' => self::$cachedir,
-	    'lifeTime' => self::$cachelife
-	));
-	$id=md5(psCli::$shop_url.psCli::$shop_key.$cmd.serialize($opt));
-	  if (self::$debug) {
-		psOut::msg("Arguments passed to web api: ".print_r($opt,true));
-	  }
-	if (self::$cache && $data = $Cache_Lite->get($id)) {
-	  $xml=New SimpleXMLElement($data);
-	  psOut::progress("Done (from cache).");
-	} else {
-	  $xml = self::$api->$cmd($opt);
-	  if (self::$cache ) $Cache_Lite->save($xml->asXML(), $id);
-	  psOut::progress("Done.");
-	}
-	if (self::$debug) {
-		psOut::msg("Returned XML:\n".$xml->asXML());
-	  }
-	return($xml);
+
+    public function apiCmd($cmd, $opt) {
+        $Cache_Lite = new Cache_Lite(array(
+            'cacheDir' => self::$cachedir,
+            'lifeTime' => self::$cachelife
+        ));
+        $id = md5(psCli::$shop_url . psCli::$shop_key . $cmd . serialize($opt));
+        if (self::$debug) {
+            psOut::msg("Arguments passed to web api: " . print_r($opt, true));
+        }
+        if (self::$cache && $data = $Cache_Lite->get($id)) {
+            $xml = New SimpleXMLElement($data);
+            psOut::progress("Done (from cache).");
+        } else {
+            $xml = self::$api->$cmd($opt);
+            if (self::$cache)
+                $Cache_Lite->save($xml->asXML(), $id);
+            psOut::progress("Done.");
+        }
+        if (self::$debug) {
+            psOut::msg("Returned XML:\n" . $xml->asXML());
+        }
+        return($xml);
     }
 
     public function reverseProps($properties) {
@@ -337,28 +349,28 @@ class psCli extends StdClass {
         return($out);
     }
 
-   public function getPropFeature($name,$prop) {
-	if (array_key_exists($name, psCli::$propfeatures)) {
-		if (array_key_exists($prop, psCli::$propfeatures[$name])) {
-			return(psCli::$propfeatures[$name][$prop]);
-		} else {
-			return(psCli::P_DEFAULT);
-		}
-	} elseif (array_key_exists('*', psCli::$propfeatures)) {
-		if (array_key_exists($prop, psCli::$propfeatures['*'])) {
-			return(psCli::$propfeatures['*'][$prop]);
-		} else {
-			return(psCli::P_DEFAULT);
-		}
-	} else {
-		return(psCli::P_DEFAULT);
-	}
-   }
+    public function getPropFeature($name, $prop) {
+        if (array_key_exists($name, psCli::$propfeatures)) {
+            if (array_key_exists($prop, psCli::$propfeatures[$name])) {
+                return(psCli::$propfeatures[$name][$prop]);
+            } else {
+                return(psCli::P_DEFAULT);
+            }
+        } elseif (array_key_exists('*', psCli::$propfeatures)) {
+            if (array_key_exists($prop, psCli::$propfeatures['*'])) {
+                return(psCli::$propfeatures['*'][$prop]);
+            } else {
+                return(psCli::P_DEFAULT);
+            }
+        } else {
+            return(psCli::P_DEFAULT);
+        }
+    }
 
     public function filterProps($obj) {
         $name = $obj->getName();
         $dom = @dom_import_simplexml($obj);
-        
+
         if (array_key_exists($name, psCli::$propfeatures)) {
             foreach (self::$propfeatures[$name] as $p => $v) {
                 if (isset($obj->$p) && ($v & self::P_BAD)) {
@@ -382,34 +394,34 @@ class psCli extends StdClass {
     public function subobject($objects) {
         switch ($objects) {
             case "addresses":
-                $ret="address";
+                $ret = "address";
                 break;
-	    case "categories":
-                $ret="category";
-                break;    
-	    case "countries":
-                $ret="country";
+            case "categories":
+                $ret = "category";
+                break;
+            case "countries":
+                $ret = "country";
                 break;
             case "currencies":
-                $ret="currency";
-                break;    
-	    case "deliveries":
+                $ret = "currency";
+                break;
+            case "deliveries":
                 $ret = "delivery";
                 break;
-	    case "order_histories":
+            case "order_histories":
                 $ret = "order_history";
                 break;
-	    case "supply_order_histories":
+            case "supply_order_histories":
                 $ret = "supply_order_history";
                 break;
-	    case "supply_order_receipt_histories":
+            case "supply_order_receipt_histories":
                 $ret = "supply_order_receipt_history";
                 break;
             case "taxes":
-                $ret="tax";
+                $ret = "tax";
                 break;
             default:
-                $ret=substr($objects, 0, -1);
+                $ret = substr($objects, 0, -1);
                 break;
         }
         if (!array_key_exists($objects, self::$resources)) {
@@ -424,25 +436,25 @@ class psCli extends StdClass {
             case "address":
                 $ret = "addresses";
                 break;
-	    case "category":
+            case "category":
                 $ret = "categories";
                 break;
-	    case "country":
+            case "country":
                 $ret = "countries";
                 break;
             case "currency":
                 $ret = "currencies";
                 break;
-	    case "delivery":
+            case "delivery":
                 $ret = "deliveries";
                 break;
-	    case "order_history":
+            case "order_history":
                 $ret = "order_histories";
                 break;
-	    case "supply_order_history":
+            case "supply_order_history":
                 $ret = "supply_order_histories";
                 break;
-	    case "supply_order_receipt_history":
+            case "supply_order_receipt_history":
                 $ret = "supply_order_receipt_histories";
                 break;
             case "tax":
@@ -486,10 +498,11 @@ class psCli extends StdClass {
         psOut::msg("--debug                 Enable debug output\n");
         psOut::msg("--output-format=x       Set output format\n");
         psOut::msg("--base64                Use base64 in output\n");
-	psOut::msg("--htmlescape            Escape html output\n");
+        psOut::msg("--htmlescape            Escape html output\n");
         psOut::msg("--cache                 Enable caching (default disable)\n");
         psOut::msg("--cache-dir             Cache diectory (default /tmp/)\n");
         psOut::msg("--cache-lifetime        Cache time in seconds (default 3600s)\n");
+        psOut::msg("--clean-cache           Clean all caches before operation\n");
         psOut::msg("--language              Set id of language to use for text operations. Defaults to 1.\n");
         psOut::msg("--dry                   Do not update anything. Just simulate.\n\n");
         psOut::msg("Available resources:\n");
