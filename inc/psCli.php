@@ -24,7 +24,8 @@ class psCli extends StdClass {
         "htmlescape",
         "delete-characters=",
         "buffered",
-        "dry"
+        "dry",
+        "or"
     );
     static $resources = Array(
         'addresses' => 'The Customer, Manufacturer and Customer addresses',
@@ -273,6 +274,11 @@ class psCli extends StdClass {
         }
         self::$debug = self::isarg("debug|d", $options);
         self::$dry = self::isarg("dry", $options);
+        if (self::isarg("or", $options,false)) {
+	  psFilter::$filterop = "OR";
+        } else {
+	  psFilter::$filterop = "AND";
+        }
         self::$verbose = self::isarg("verbose|v", $options);
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
@@ -505,6 +511,7 @@ class psCli extends StdClass {
         psOut::msg("--clean-cache           Clean all caches before operation\n");
         psOut::msg("--language              Set id of language to use for text operations. Defaults to 1.\n");
         psOut::msg("--dry                   Do not update anything. Just simulate.\n\n");
+        psOut::msg("--or                    All filters are grouped by OR. By defaults it is ANDed.\n\n");
         psOut::msg("Available resources:\n");
         if (PSCMD == "list") {
             psOut::msg(psCli::helpResources() . "\n");

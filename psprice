@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+  echo $0 refcode
+  exit 1
+fi
+
+getpprice() {
+   echo "product $1"
+}
+
+getcprice() {
+   echo "combination $1"
+}
+
+product=$(pslist products reference="$1")
+if [ $(echo $product | wc -w) -gt 1 ]; then
+  echo "Multiple products with refcode $1. Exiting!"
+  exit 2
+fi
+
+if [ -n "$product" ]; then
+  getpprice $(psget product $product)
+else
+  combination=$(pslist combinations reference="$1")
+  if [ $(echo $combination | wc -w) -gt 1 ]; then
+    echo "Multiple combinations with refcode $1. Exiting!"
+    exit 2
+  fi
+  getcprice $(psget combination $combination)
+fi
+

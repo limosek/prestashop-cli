@@ -12,7 +12,7 @@ try {
     array_shift($args);
     if (strlen($objects)==0) {
         PsOut::error("Error! Enter objects you want to list.\n" . basename(__FILE__)
-                . " resource [filter]... [id]... [property]\n"
+                . " [--or] resource [filter]... [id]... [property]\n"
                 . "Filter(s):\n"
                 . "property=value to match exactly\n"
                 . "property>value to match objects with property bigger than value\n"
@@ -51,7 +51,9 @@ try {
     }
     if (sizeof(psCli::$apifilter)>0) {
         foreach (psCli::$apifilter as $f =>$v) {
-            $opt["filter[$f]"]="[$v]";
+	    if ($v!=psFilter::F_NA) {
+	      $opt["filter[$f]"]="[$v]";
+            }
         }
     }
     psOut::progress("Getting data for $objects($object)...");
