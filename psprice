@@ -2,31 +2,55 @@
 
 if [ -z "$1" ]; then
   echo $0 refcode
+  echo "Use env variable PS_COUNTRY to force price computation for country. Default is 1."
+  echo "Use $0 | bc to get real numbers instead of formulas"
   exit 1
 fi
 
+gettax() {
+  local id_tax rate country
+  if [ -n "$PS_COUNTRY" ]; then country=$PS_COUNTRY; else country=1; fi
+  if [ "$1" = "0" ]; then
+      echo 0
+  else
+      eval $(pslist -Fenv tax_rules id_tax_rules_group=$1 id_country=$country id_tax)
+      rate=$(psget tax $id_tax rate)
+      echo $rate
+  fi
+}
+
 getpprice() {
-   echo "product $1"
+   local price id_tax_rules_group country rate
+   eval $(psget -Fenv product "$1" price id_tax_rules_group)
+   rate=$(gettax $id_tax_rules_group)
+   [ -n "$2" ] && price="$price+$2"
+   echo "($price)*(1+$rate/100)"
 }
 
 getcprice() {
-   echo "combination $1"
+   local pprice price id_product
+   eval $(psget -Fenv combination $1 id_product price)
+   pprice=$(getpprice $id_product $price)
+   echo $pprice
 }
 
-product=$(pslist products reference="$1")
-if [ $(echo $product | wc -w) -gt 1 ]; then
-  echo "Multiple products with refcode $1. Exiting!"
-  exit 2
-fi
+while [ -n "$1" ]; do
+    product=$(pslist products reference="$1")
+    if [ $(echo $product | wc -w) -gt 1 ]; then
+      echo "Multiple products with refcode $1. Exiting!"
+      exit 2
+    fi
 
-if [ -n "$product" ]; then
-  getpprice $(psget product $product)
-else
-  combination=$(pslist combinations reference="$1")
-  if [ $(echo $combination | wc -w) -gt 1 ]; then
-    echo "Multiple combinations with refcode $1. Exiting!"
-    exit 2
-  fi
-  getcprice $(psget combination $combination)
-fi
+    if [ -n "$product" ]; then
+      getpprice $(psget product $product)
+    else
+      combination=$(pslist combinations reference="$1")
+      if [ $(echo $combination | wc -w) -gt 1 ]; then
+	echo "Multiple combinations with refcode $1. Exiting!"
+	exit 2
+      fi
+    getcprice $(psget combination $combination)
+    fi
+    shift
+done
 
