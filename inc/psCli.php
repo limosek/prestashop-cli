@@ -150,6 +150,10 @@ class psCli extends StdClass {
             ),
             "products" => Array(
                 "id_product_option_value" => self::P_VIRTUAL
+            ),
+            "category" => Array(
+                "level_depth" => self::P_BAD,
+                "nb_products_recursive" => self::P_BAD
             )
         );
         if (isset(parent::$shortopts) && is_array(parent::$shortopts)) {
