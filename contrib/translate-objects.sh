@@ -52,8 +52,6 @@ if [ -z "$lto" ]; then
   exit 2
 fi
 
-echo $@
-
 for o in $objs; do
     for p in $properties; do
       ftxt=$(psget --language=$lfrom --noescape $object $o $p)
