@@ -22,6 +22,7 @@ class psCli extends StdClass {
         "properties=",
         "base64",
         "htmlescape",
+        "noescape",
         "delete-characters=",
         "buffered",
         "dry",
@@ -283,6 +284,7 @@ class psCli extends StdClass {
         psOut::$progress = self::isarg("progress|p", $options);
         psOut::$base64 = self::isarg("base64", $options);
         psOut::$htmlescape = self::isarg("htmlescape", $options);
+        psOut::$escape = !self::isarg("noescape", $options,false);
         psOut::$oformat = self::getarg("output-format|F", $options, "cli");
         psOut::$csvsep = self::getarg("csv-separator", $options, ";");
         psOut::$delchars = self::getarg("delete-characters", $options, false);

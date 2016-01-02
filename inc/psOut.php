@@ -6,6 +6,7 @@ class psOut extends StdClass {
     static $oformat = "cli";
     static $base64 = false;
     static $htmlescape = false;
+    static $escape = true;
     static $buffered = false;
     static $context = false;
     static $category = "row";
@@ -114,7 +115,11 @@ class psOut extends StdClass {
     }
     
     public function slashes($str) {
-        return(addcslashes($str,self::ESCAPECHARS));
+	if (self::$escape) {
+	  return(addcslashes($str,self::ESCAPECHARS));
+        } else {
+	  return($str);
+        }
     }
     
     public function csvslashes($str) {
