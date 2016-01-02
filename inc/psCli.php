@@ -387,7 +387,7 @@ class psCli extends StdClass {
             foreach (self::$propfeatures[$name] as $p => $v) {
                 if (isset($obj->$p) && ($v & self::P_BAD)) {
                     if (is_object($dom->getElementsByTagName($p))) {
-                        $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                        $dom->removeChild($dom->getElementsByTagName($p)->item(0));
                     }
                 }
             }
@@ -395,7 +395,7 @@ class psCli extends StdClass {
             foreach (self::$propfeatures["*"] as $p => $v) {
                 if (isset($obj->$p) && ($v & self::P_BAD)) {
                     if (is_object($dom->getElementsByTagName($p))) {
-                        $dom->removeChild($dom->getElementsByTagName($p)[0]);
+                        $dom->removeChild($dom->getElementsByTagName($p)->item(0));
                     }
                 }
             }
