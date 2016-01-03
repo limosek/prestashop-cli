@@ -411,6 +411,9 @@ class psCli extends StdClass {
             case "categories":
                 $ret = "category";
                 break;
+            case "content_management_system":
+                $ret = "content";
+                break;
             case "countries":
                 $ret = "country";
                 break;
@@ -450,6 +453,9 @@ class psCli extends StdClass {
                 break;
             case "category":
                 $ret = "categories";
+                break;
+            case "content":
+                $ret = "content_management_system";
                 break;
             case "country":
                 $ret = "countries";

@@ -132,7 +132,7 @@ class psOut extends StdClass {
     
     public function encode($var) {
 	if (self::$delchars) {
-	   $var=strtr($var,self::$delchars," ");
+	   $var=strtr($var,self::$delchars,str_repeat(" ",strlen(self::$delchars)));
 	}
         if (self::$htmlescape) {
             $var=htmlspecialchars($var);

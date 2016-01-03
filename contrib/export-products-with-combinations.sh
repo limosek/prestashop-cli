@@ -31,7 +31,7 @@ eval $(pslist -Fenvarr combinations 'reference!=' id_product price reference wei
 
 # Products with price=0 are combinations only for me
 prodids=$(pslist products active=1 'reference!=')
-eval $(pslist -Fenvarr '--delete-characters=;' products 'reference!=' price reference weight id_category_default description_short description name)
+eval $(pslist -Fenvarr '--delete-characters=;"' products 'reference!=' price reference weight id_category_default description_short description name)
 
 # Get all product options
 eval $(pslist -Fenvarr product_options name)
