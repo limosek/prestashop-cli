@@ -33,7 +33,7 @@ try {
     psOut::progress("Getting data for $objects($object)...");
     $opt['id'] = $objectid;
     $xml = $webService->get($opt);
-    $basefile=tempnam("/tmp","pscli");
+    $basefile=tempnam(psCli::$cachedir,"pscli");
     $origfile="$basefile.old";
     $newfile="$basefile.new";
     if (psCli::$debug || psCli::$dry) {
