@@ -19,18 +19,6 @@ shift
 to=$1
 shift
 
-lfrom=$(pslist languages iso_code=$from)
-lto=$(pslist languages iso_code=$to)
-
-if [ -z "$lfrom" ]; then
-  echo "Language $from not enabled?"
-  exit 2
-fi
-if [ -z "$lto" ]; then
-  echo "Language $to not enabled?"
-  exit 2
-fi
-
 ( 
   translate-objects.sh products description,description_short $from $to translate_yandex
   translate-objects.sh products name $from $to translate_google

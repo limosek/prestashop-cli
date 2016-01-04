@@ -9,6 +9,7 @@
 
 if [ -z "$4" ]; then
   echo $0 "objects property[,prperty]... from to trans_function filter"
+  echo "from and to is in format pslang[/translang]"
   exit 2
 fi
 
@@ -19,12 +20,24 @@ objects2object()
 
 translate_yandex()
 {
-   echo $* | trans -b -e yandex -s $from -t $to
+   echo $* | trans -b -e yandex -s $trfrom -t $trto
 }
 
 translate_google()
 {
-   echo $* | trans -b -e google -s $from -t $to
+   echo $* | trans -b -e google -s $trfrom -t $trto
+}
+
+pslang()
+{
+   echo $1 | cut -d '/' -f 1
+}
+
+trlang()
+{
+   local l
+   l=$(echo $1 | cut -d '/' -f 2)
+   [ -z "$l" ] && echo $1
 }
 
 objects=$1
@@ -32,15 +45,17 @@ object=$(objects2object $1)
 shift
 properties=$(echo $1 | tr ',' ' ')
 shift
-from=$1
+psfrom=$(pslang $1)
+trfrom=$(trlang $1)
 shift
-to=$1
+psto=$(pslang $1)
+trto=$(trlang $1)
 shift
 trans_function=$1
 shift
 
-lfrom=$(pslist languages iso_code=$from)
-lto=$(pslist languages iso_code=$to)
+lfrom=$(pslist languages iso_code=$psfrom)
+lto=$(pslist languages iso_code=$psto)
 
 objs=$(pslist $objects "$@")
 if [ -z "$lfrom" ]; then
