@@ -27,20 +27,20 @@ getpov()
 
 # Get all combination ids into variable. 
 combids=$(pslist combinations 'reference!=')
-eval $(pslist -Fenvarr combinations 'reference!=' id_product price reference weight)
+eval $(pslist -Fenvarr '--delete-characters=;"' combinations 'reference!=' id_product price reference weight)
 
 # Products with price=0 are combinations only for me
 prodids=$(pslist products active=1 'reference!=')
 eval $(pslist -Fenvarr '--delete-characters=;"' products 'reference!=' price reference weight id_category_default description_short description name)
 
 # Get all product options
-eval $(pslist -Fenvarr product_options name)
+eval $(pslist -Fenvarr '--delete-characters=;"' product_options name)
 
 # Get all product option values
-eval $(pslist -Fenvarr product_option_values name id_attribute_group)
+eval $(pslist -Fenvarr '--delete-characters=;"' product_option_values name id_attribute_group)
 
 # Get all categories
-eval $(pslist -Fenvarr categories name)
+eval $(pslist -Fenvarr '--delete-characters=;"' categories name)
 
 for c in $combids; do
 	price=${combinations[$c,price]}
@@ -70,7 +70,7 @@ for p in $prodids; do
 	  continue
 	fi
   	(
-	eval $(psget -Fenv product $p )
+	eval $(psget -Fenv '--delete-characters=;"' product $p )
 	category=${categories[$id_category_default,name]}
 	[ -z "$description" ] && description=$description_short}
     	csvline "$reference" "$name" "$description" "$category" "$weight" "$price" $(pslist stock_availables id_product=$p quantity | cut -d ' ' -f 2)
