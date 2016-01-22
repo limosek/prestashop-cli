@@ -30,8 +30,8 @@ combids=$(pslist combinations 'reference!=')
 eval $(pslist -Fenvarr '--delete-characters=;"' combinations 'reference!=' id_product price reference weight)
 
 # Products with price=0 are combinations only for me
-prodids=$(pslist products active=1 'reference!=')
-eval $(pslist -Fenvarr '--delete-characters=;"' products 'reference!=' price reference weight id_category_default description_short description name)
+prodids=$(pslist products active=1 'reference!=' "$@")
+eval $(pslist -Fenvarr '--delete-characters=;"' products 'reference!=' "$@" price reference weight id_category_default description_short description name)
 
 # Get all product options
 eval $(pslist -Fenvarr '--delete-characters=;"' product_options name)
@@ -45,6 +45,7 @@ eval $(pslist -Fenvarr '--delete-characters=;"' categories name)
 for c in $combids; do
 	price=${combinations[$c,price]}
 	id_product=${combinations[$c,id_product]}
+	[ -z "${products[$id_product,id]}" ] && continue # Product is not in list
 	pprice=${products[$id_product,price]}
 	id_product_option_value=$(psget combination $c id_product_option_value)
     	optionvalue=$(getpov $id_product_option_value name)
