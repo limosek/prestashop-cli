@@ -97,6 +97,7 @@ product2comb()
 	for c in $combinations; do
 		log " Combination $c of product $p"
 		price=${combinations[$c,price]}
+		id_default_image=${products[$p,id_default_image]}
 		id_category_default=${products[$p,id_category_default]}
 		category=${categories[$id_category_default,name]}
  		[ -z "$description" ] && description=${products[$p,description_short]}
