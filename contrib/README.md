@@ -63,21 +63,6 @@ $ link-category-to-groups.sh '.*' '.*'
 
 ``` 
 
-## list-products-with-combinations.sh ##
-This script will list all products, their combination, prices and quantities. Sometime it is hard to find all combinations
-of product via web and to check prices. You can see all this informations in one text file:
-
-### Example ###
-```
-$ list-products-with-combinations.sh
-"Kostivalová mast" 76.000000 "Balení":Dárková dóza 50ml s \"frost\" efektem¸+ bílé víčko 0
-"Kostivalová mast" 32.000000 "Balení":Dóza 15ml dvouplášťová, bílá 0
-"Kostivalová mast" 99.000000 "Balení":Dóza 100ml průhledná + bílé víčko 0
-"Kostivalová mast" 49.000000 "Balení":Dárková dóza 30ml s \"frost\" efektem 0
-"Levandulový sprchový gel" 79.000000 "Balení":Lahvička 200ml průhledná 19
-...
-```
-
 ## list-products-with-taxrule.sh ##
 Sometime it is hard to find all products and their tax rules. Maybe when you deployed your shop, you used bad tax (VAT, without VAT, etc.)
 This script will shou you all produts with given taxrule. If you use taxrule 0, it means without tax. If you do not enter any parameters, it will show you
@@ -130,4 +115,9 @@ $ update-products-change-tax.sh 1 0 1.21 | sh
 
 ```
 
+## export-xml-zbozi_cz.sh ##
+This script is used to create xml feed compatible with new format of zbozi.cz xml feed.
+'''
+$ export-xml-zbozi_cz.sh http://odeli.cz >feed.xml
+'''
 

@@ -66,15 +66,17 @@ else
 	shift
 fi
 
+filter="$@"
+
 # Get all combination ids into variable. 
 log "Getting combinations"
 combids=$(pslist combinations 'reference!=')
 eval $(pslist -Fenvarr '--delete-characters=;"' combinations 'reference!=' id_product price reference weight)
 
 # Products with price=0 are combinations only for me
-log "Getting products"
-prodids=$(pslist products active=1 'reference!=' "$@")
-eval $(pslist -Fenvarr '--delete-characters=;"' products 'reference!=' "$@" price reference weight id_category_default description_short description name ean13 manufacturer_name id_default_image)
+log "Getting products (filter=$filter)"
+prodids=$(pslist $flag products active=1 'reference!=' $filter)
+eval $(pslist -Fenvarr '--delete-characters=;"' $flag products 'reference!=' $filter price reference weight id_category_default description_short description name ean13 manufacturer_name id_default_image)
 
 # Get all product options
 log "Getting product options"
