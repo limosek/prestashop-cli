@@ -8,7 +8,7 @@
 xmlproduct(){
 cat <<EOF
 <SHOPITEM>
- <ITEM_ID>${products[$p,reference]}</ITEM_ID>
+ <ITEM_ID>$1</ITEM_ID>
  <PRODUCTNAME>${products[$p,name]}</PRODUCTNAME>
  <DESCRIPTION>$(php -r "echo strip_tags('${products[$p,description]}');")</DESCRIPTION>
  <CATEGORYTEXT>$category</CATEGORYTEXT>
@@ -17,12 +17,12 @@ if [ "${products[$p,ean13]}" != 0 ]; then
   echo "<EAN>${products[$p,ean13]}</EAN>"
 fi
 cat <<EOF
- <PRODUCTNO>${products[$p,reference]}</PRODUCTNO>
+ <PRODUCTNO>$1</PRODUCTNO>
  <MANUFACTURER>${products[$p,manufacturer_name]}</MANUFACTURER>
  <URL>$product_url</URL>
  <IMGURL>$img_url</IMGURL>
  <PRICE_VAT>${products[$p,price]}</PRICE_VAT>
- $1
+ $2
  </SHOPITEM>
 EOF
 }
@@ -110,7 +110,7 @@ product2comb()
 			optionname=$(getpo $(getpov $o id_attribute_group))
 			options="$options<PARAM><PARAM_NAME>$optionname</PARAM_NAME><VAL>$optionvalue</VAL></PARAM>"	
 		done
-		xmlproduct "$options"
+		xmlproduct ${combinations[$c,reference]} "$options"
 	done
 }
 
@@ -130,7 +130,7 @@ for p in $prodids; do
 	[ -z "$description" ] && description=${products[$p,description_short]}
 	product_url="$shop_url/index.php?controller=product&amp;id_product=$id_product"
 	img_url="$shop_url/$id_default_image-large_default/img.jpg"
-    	xmlproduct 
+    	xmlproduct ${products[$p,reference]}
     	)
 done
 
