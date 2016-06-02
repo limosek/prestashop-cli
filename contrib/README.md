@@ -120,4 +120,10 @@ This script is used to create xml feed compatible with new format of zbozi.cz xm
 '''
 $ export-xml-zbozi_cz.sh http://odeli.cz >feed.xml
 '''
+To create better filter which products to export, use two pass execution. First for selecting objects, second to export:
+```
+$ ids=$(pslist products id_category_default=1)
+$ ids2=$(pslist products id_category_default=3)
+$ export-xml-zbozi_cz.sh http://odeli.cz $ids $ids2 >feed.xml
+```
 

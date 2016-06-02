@@ -43,6 +43,9 @@ try {
     }
     if (psCli::$debug) {
         psOut::msg("Filter: ".print_r($filter,true)."\n");
+	if (sizeof($ids)>0) {
+	  psOut::msg("IDs to filter: ".print_r($ids,true)."\n");
+	}
     }
     psCli::initApi();
     $opt = array('resource' => $objects);
@@ -65,9 +68,9 @@ try {
     $cnt = sizeof($data);
     psOut::begin($objects, $object);
     foreach ($data as $r) {
-        $id = (string) $r["id"];
+        $id = (string) $r->id;
         if (sizeof($ids)>0 && !array_key_exists($id,$ids)) {
-            continue;
+           continue;
         }
         $rowdata = psGet::getValues($r);
         if (psFilter::$enabled) {
