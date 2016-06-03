@@ -111,8 +111,8 @@ product2comb()
 			optionname=$(getpo $(getpov $o id_attribute_group))
 			options="$options<PARAM><PARAM_NAME>$optionname</PARAM_NAME><VAL>$optionvalue</VAL></PARAM>"	
 		done
-		xmlproduct ${combinations[$c,reference]} "$options"
 	done
+	xmlproduct ${combinations[$p,reference]} "$options"
 }
 
 xmlheader
@@ -124,12 +124,12 @@ for p in $prodids; do
 	  continue
 	fi
   	(
-	id_category_default=${products[$id_product,id_category_default]}
+	id_category_default=${products[$p,id_category_default]}
 	category=${categories[$id_category_default,name]}
  	[ -z "$description" ] && description=${products[$p,description_short]}
 	category=${categories[$id_category_default,name]}
 	[ -z "$description" ] && description=${products[$p,description_short]}
-	product_url="$shop_url/index.php?controller=product&amp;id_product=$id_product"
+	product_url="$shop_url/index.php?controller=product&amp;id_product=$p"
 	img_url="$shop_url/$id_default_image-large_default/img.jpg"
     	xmlproduct ${products[$p,reference]}
     	)
