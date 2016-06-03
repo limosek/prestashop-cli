@@ -21,7 +21,7 @@ cat <<EOF
  <MANUFACTURER>${products[$p,manufacturer_name]}</MANUFACTURER>
  <URL>$product_url</URL>
  <IMGURL>$img_url</IMGURL>
- <PRICE_VAT>${products[$p,price]}</PRICE_VAT>
+ <PRICE_VAT>$price</PRICE_VAT>
  $2
  </SHOPITEM>
 EOF
@@ -94,9 +94,11 @@ product2comb()
 {
 	p="$1"
 	combinations=$(pslist combinations id_product=$p)
+	options=""
 	for c in $combinations; do
 		log " Combination $c of product $p"
 		price=${combinations[$c,price]}
+		[ "$price" = 0.000000 ] && price=${products[$p,price]}
 		id_default_image=${products[$p,id_default_image]}
 		id_category_default=${products[$p,id_category_default]}
 		category=${categories[$id_category_default,name]}
@@ -131,6 +133,7 @@ for p in $prodids; do
 	[ -z "$description" ] && description=${products[$p,description_short]}
 	product_url="$shop_url/index.php?controller=product&amp;id_product=$p"
 	img_url="$shop_url/$id_default_image-large_default/img.jpg"
+	price=${products[$p,price]}
     	xmlproduct ${products[$p,reference]}
     	)
 done
