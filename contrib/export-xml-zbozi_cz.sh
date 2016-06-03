@@ -112,7 +112,7 @@ product2comb()
 			options="$options<PARAM><PARAM_NAME>$optionname</PARAM_NAME><VAL>$optionvalue</VAL></PARAM>"	
 		done
 	done
-	xmlproduct ${combinations[$p,reference]} "$options"
+	xmlproduct ${products[$p,reference]} "$options"
 }
 
 xmlheader
