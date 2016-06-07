@@ -58,11 +58,24 @@ getpov()
 	echo ${product_option_values[$1,$2]} 
 }
 
-if [ -z "$1" ]; then
-	echo $0 shop-url
+getpquantity()
+{
+	pslist stock_availables id_product=$1 quantity | cut -d ' ' -f 2
+}
+
+getcquantity()
+{
+	pslist stock_availables id_product=$1 id_product_attribute=$2 quantity | cut -d ' ' -f 2
+}
+
+
+if [ -z "$2" ]; then
+	echo $0 shop-url min-quantity-to-export
 	exit 2
 else
 	shop_url="$1"
+	shift
+	min_quantity="$1"
 	shift
 fi
 
@@ -95,6 +108,7 @@ product2comb()
 	p="$1"
 	combinations=$(pslist combinations id_product=$p)
 	options=""
+	quantified=0
 	for c in $combinations; do
 		log " Combination $c of product $p"
 		price=${combinations[$c,price]}
@@ -108,13 +122,20 @@ product2comb()
 		id_product_option_value=$(psget combination $c id_product_option_value)
 		product_url="$shop_url/index.php?controller=product&amp;id_product=$p"
 		img_url="$shop_url/$id_default_image-large_default/img.jpg"
+		q=$(getcquantity $p $c)
+		if [ $q -lt $min_quantity ]; then
+			log "Skipping combination $c for low quantity ($q)"
+			continue
+		fi
+		quantified=1
 		for o in $(echo $id_product_option_value | tr ',' ' '); do
 			optionvalue=$(getpov $o name)
 			optionname=$(getpo $(getpov $o id_attribute_group))
-			options="$options<PARAM><PARAM_NAME>$optionname</PARAM_NAME><VAL>$optionvalue</VAL></PARAM>"	
+			options="$options<PARAM><PARAM_NAME>$optionname</PARAM_NAME><VAL>$optionvalue</VAL></PARAM>"
+			log "Quantity $q"
 		done
 	done
-	xmlproduct ${products[$p,reference]} "$options"
+	[ $quantified -eq 1 ] && xmlproduct ${products[$p,reference]} "$options"
 }
 
 xmlheader
@@ -124,6 +145,11 @@ for p in $prodids; do
 	if [ -n "$(pslist combinations id_product=$p)" ]; then
 	  product2comb $p
 	  continue
+	fi
+	q=$(getpquantity $p)
+	if [ $q -lt $min_quantity ]; then
+		log "Skipping product $p for low quantity ($q)"
+		continue
 	fi
   	(
 	id_category_default=${products[$p,id_category_default]}
