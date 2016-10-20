@@ -18,7 +18,7 @@ Of course you can send some donations to bitcoin address **1EaKkkLKqC6f9DiMPUfMv
 # Howto
 
 ## Installation ##
-Prestasoph-cli needs php5 cli and PHP pear package. It is theoreticaly possible to run this software on Windows using Cygwin
+Prestasoph-cli needs php5 cli and PHP pear package. It is theoretically possible to run this software on Windows using Cygwin
 but it is not tested. On debian systems, use:
 ```
 $ sudo apt-get install php5-cli php-pear php5-curl git
@@ -28,11 +28,11 @@ $ cd prestashop-cli
 $ . env.sh
 $ {pslist|psget|psprops|psupdate|psdel|psenable|psdisable} [options]
 ```
-If you use env.sh, autocompletion is working automaticaly so you can use TAB. 
+If you use env.sh, autocompletion is working automatically so you can use TAB. 
 If you run command without parameters, it will show help options.
 You can even use --help to get more help.
 
-If you want to use this utilities offten and you do not want to run env.sh any time:
+If you want to use this utilities often and you do not want to run env.sh any time:
 ```
 $ sh $PWD/env.sh install >>~/.profile
 ```
@@ -247,17 +247,17 @@ $ ./pslist languages name iso_code active active=1
 
 ### List product with filter and more fields ###
 You can use one or more filters. There is logical and between filter outputs. 
-Filter operators are =,<,>,%<,%>,~,!=,!~ (equal, less than, bigger than, older than, newwe than, regexp, not equal, not regexp)
+Filter operators are =,<,>,%<,%>,~,!=,!~ (equal, less than, bigger than, older than, newer than, regexp, not equal, not regexp)
 Do not forget to use '' due to shell special characters!
 By default only ids are returned. To return more properties, use property name without filter.
 ```
 #                   Only_new   Include_price_in_output   Include_name_in_output    Filter: price has to be bigger than 10
 $ ./pslist products condition=new      price                     name                      'price>10'
-$ ./pslist products id_manucacturer=1
-$ ./pslist products 'price>10' id_manucacturer=1 # (logical and)
+$ ./pslist products id_manufacturer=1
+$ ./pslist products 'price>10' id_manufacturer=1 # (logical and)
 $ ./pslist products 'reference!=' # To list all products without reference
 $ ./pslist products 'date_add%>2 day ago' # To compare date
-$ (./pslist products 'price>10'; ./pslist products id_manucacturer=1) # (logical or)
+$ (./pslist products 'price>10'; ./pslist products id_manufacturer=1) # (logical or)
 ```
 
 ### Get product values ###
@@ -274,7 +274,7 @@ $ ./psupdate product 8 quantity=10 price=20 # (set both values)
 ```
 
 ### Add object ###
-You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use psadd output of psget to "clone" objects. It is goog idea to use base64 encoding for data to not collide with shell expansion. Do not forget that it is not full clone of object! Only parameters accessible via API are cloned.
+You can add object by similar syntax as update object. But you have to put all needed properities to do so. You can use psadd output of psget to "clone" objects. It is good idea to use base64 encoding for data to not collide with shell expansion. Do not forget that it is not full clone of object! Only parameters accessible via API are cloned.
 
 ```
 $ psget -Fpsadd address 10
