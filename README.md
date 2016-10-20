@@ -18,7 +18,7 @@ Of course you can send some donations to bitcoin address **1EaKkkLKqC6f9DiMPUfMv
 # Howto
 
 ## Installation ##
-Prestasoph-cli needs php5 cli and PHP pear package. It is theoretically possible to run this software on Windows using Cygwin
+prestashop-cli needs php5 cli and PHP pear package. It is theoretically possible to run this software on Windows using Cygwin
 but it is not tested. On debian systems, use:
 ```
 $ sudo apt-get install php5-cli php-pear php5-curl git
@@ -28,6 +28,8 @@ $ cd prestashop-cli
 $ . env.sh
 $ {pslist|psget|psprops|psupdate|psdel|psenable|psdisable} [options]
 ```
+(Note - on `*buntu you can 'sudo apt-get install php-cache-lite' instead of 'sudo pear install cache_lite'):
+
 If you use env.sh, autocompletion is working automatically so you can use TAB. 
 If you run command without parameters, it will show help options.
 You can even use --help to get more help.
