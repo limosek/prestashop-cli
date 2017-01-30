@@ -28,7 +28,10 @@ $ cd prestashop-cli
 $ . env.sh
 $ {pslist|psget|psprops|psupdate|psdel|psenable|psdisable} [options]
 ```
-(Note - on \*buntu you can 'sudo apt-get install php-cache-lite' instead of 'sudo pear install cache_lite'):
+
+**Note** - on \*buntu you can 'sudo apt-get install php-cache-lite' instead of 'sudo pear install cache_lite'
+
+**Note** - Some examples and docs can be found even on [my site](https://macura.cz/search/node?keys=prestashop)
 
 If you use env.sh, autocompletion is working automatically so you can use TAB. 
 If you run command without parameters, it will show help options.
