@@ -11,7 +11,7 @@ with readonly access (or minimal access) to test everything.
 If you found this project usefull, you can help to improve it (yes, it is opensource :) ). Best way is to share your scripts 
 into contrib directory of this project. So if you made some script which will do some mass operation with your Prestashop, 
 please contact me and I will share it [here](https://github.com/limosek/prestashop-cli/tree/master/contrib).
-Of course you can send some donations to bitcoin address **1EaKkkLKqC6f9DiMPUfMvbRXWJZBebe1Yx**
+Of course you can send some donations to bitcoin address **1EaKkkLKqC6f9DiMPUfMvbRXWJZBebe1Yx** or to PayPal account *lukas@macura.cz*.
 
 ![QR code](https://raw.githubusercontent.com/limosek/prestashop-cli/master/bitcoin-address.png)
 
